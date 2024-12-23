@@ -1,9 +1,9 @@
 import orderModel from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
+import axios from 'axios';
 import Stripe from 'stripe'
 import razorpay from 'razorpay'
-import { response } from "express";
-
+ 
 //global varibales
 const currency = 'inr'
 const deliveryCharge = 10
@@ -17,11 +17,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 
 
-//Placing orders using cod method
+//Placing orders using cod method  
+
 
 const placeOrder = async (req,res) => {
     
-    try {
+    try { 
         const {userId,items,amount,address} = req.body;
         const orderData = {
             userId,
@@ -40,6 +41,16 @@ const placeOrder = async (req,res) => {
     } catch (error) {
         console.log(error);
         res.json({success:false, message:error.message});
+        
+    }
+}
+
+const placeOrderCashfree = async (req,res) =>{
+    try {
+        let version = cashfree.version();
+        console.log(version);
+        
+    } catch (error) {
         
     }
 }
@@ -163,7 +174,7 @@ const verifyRazorpay = async (req,res) => {
        if (orderInfo.status==='paid') {
         await orderModel.findByIdAndUpdate(orderInfo.receipt,{payment:true});
         await userModel.findByIdAndUpdate(userId, {cartData:{}})
-        response.json({success:true, message:"Payment Successful"})
+        res.json({success:true, message:"Payment Successful"})
        }else{
         res.json({success:false, message:'Payment Failed'})
        }
@@ -213,4 +224,4 @@ const updateStatus = async (req,res) => {
     }
 }
 
-export {placeOrder,placeOrderStripe,placeOrderRazorpay,allOrders,userOrders,updateStatus,verifyStripe,verifyRazorpay}
+export {placeOrder,placeOrderCashfree,placeOrderStripe,placeOrderRazorpay,allOrders,userOrders,updateStatus,verifyStripe,verifyRazorpay}
