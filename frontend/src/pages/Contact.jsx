@@ -13,9 +13,11 @@ const Contact = () => {
       <div className='my-10 flex flex-col justify-center md:flex-row gap-10 mb-28'>
         <img className='w-full md:max-[480px]:' src={assets.contact_img} alt="" />
         <div className='flex flex-col justify-center items-start gap-6'>
-           <p className='font-semibold text-xl text-gray-600'>Our Store</p>
-           <p className='text-gray-500'>This, is   a Dummy<br /> Address</p>
-           <p>Tel:(323) 555-3933 <br/> Email:admin@forever.com</p>
+           <p className='font-semibold text-xl text-gray-600'>Last updated on 23-12-2024 16:29:06
+           </p>
+           <p className='text-gray-500'>Merchant Legal entity name: ADITYA PRAKASH
+<br /> Registered Address: Chitkara University, Baddi, Himachal Pradesh, PIN: 174103</p>
+           <p>Telephone No: 7764924355<br/> E-Mail ID: aditprakash.77@gmail.com</p>
            <p className='font-semibold text-xl text-gray-600'>Careers at Forever</p>
            <p className='text-gray-500'>Learn more about out teams and Job openings Address</p>
            <button className='border border-black px-8 py-4 text-sm hover:bg-black hover:text-white transition-all duration-500'>Explore Jobs</button>
