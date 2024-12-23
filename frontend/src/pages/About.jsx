@@ -1,9 +1,11 @@
 import React from 'react'
 import Title from '../components/Title'
 import { assets } from '../assets/assets'
+import { useNavigate, Link } from 'react-router-dom'
 import NewsletterBox from '../components/NewsletterBox'
 
 const About = () => {
+  const navigate = useNavigate();
   return (
     <div>
       <div className='text-2xl text-center pt-8 border-t'>
@@ -18,7 +20,9 @@ const About = () => {
         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Id nostrum ea voluptates debitis sint beatae nobis, iste reprehenderit doloribus aspernatur cumque, similique voluptatum nisi, minima cupiditate sapiente? Excepturi, optio. Dolore.</p>
         <b className='text-gray-800'>Our Mission</b>
         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam iure numquam tempore unde corrupti cupiditate eius nihil laborum doloribus, ea soluta sit perspiciatis ducimus quae doloremque praesentium molestiae necessitatibus quaerat.</p>
+        <Link to='/terms' className='bg-black text-gray-200 text-center'>Terms and Conditions</Link>
         </div>
+        
       </div>
 
       <div className='text-xl py-4'>
@@ -39,7 +43,7 @@ const About = () => {
           <b>Exceptional Customer Service:</b>
           <p className='text-gray-600'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit laborum a pariatur non maxime laboriosam tempora blanditiis ad maiores quia ab, ea quisquam facere animi, aperiam officia totam omnis perferendis?</p>
         </div>
-
+       
       </div>
       <NewsletterBox/>
     </div>
