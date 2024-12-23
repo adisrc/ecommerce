@@ -1,16 +1,14 @@
 import React from 'react'
 import Title from '../components/Title'
 import { assets } from '../assets/assets'
-import { useNavigate, Link } from 'react-router-dom'
+import {Link } from 'react-router-dom'
 import NewsletterBox from '../components/NewsletterBox'
 
 const About = () => {
-  const navigate = useNavigate();
   return (
     <div>
       <div className='text-2xl text-center pt-8 border-t'>
         <Title text1={'ABOUT'} text2={'US'}/>
-
       </div>
 
       <div className='my-10 flex flex-col md:flex-row gap-16'>
@@ -20,7 +18,8 @@ const About = () => {
         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Id nostrum ea voluptates debitis sint beatae nobis, iste reprehenderit doloribus aspernatur cumque, similique voluptatum nisi, minima cupiditate sapiente? Excepturi, optio. Dolore.</p>
         <b className='text-gray-800'>Our Mission</b>
         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam iure numquam tempore unde corrupti cupiditate eius nihil laborum doloribus, ea soluta sit perspiciatis ducimus quae doloremque praesentium molestiae necessitatibus quaerat.</p>
-        <Link to='/terms' className='bg-black text-gray-200 text-center'>Terms and Conditions</Link>
+        <Link to={'/terms'} className='bg-black text-gray-200 text-center'>Terms and Conditions</Link>
+        <Link to={'/refund'} className=''>Refund & Cancellations</Link>
         </div>
         
       </div>
