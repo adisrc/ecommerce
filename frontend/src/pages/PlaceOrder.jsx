@@ -5,10 +5,16 @@ import { assets } from '../assets/assets'
 import { useState } from 'react'
 import { ShopContext } from '../context/ShopContext'
 import { toast } from 'react-toastify'
-import axios from 'axios'
-import { cashfree } from '../../util'  
+import axios from 'axios' 
+import {load} from '@cashfreepayments/cashfree-js';
 
 const PlaceOrder = () => {
+  let initializeSDK = async function () {
+    cashfree = await load({
+      mode: "production" // or sandbox
+    });
+  }
+  initializeSDK();
   const [method,setMethod] = useState('cod');
   const [orderId, setOrderId] = useState('');
   const{navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products} = useContext(ShopContext);
