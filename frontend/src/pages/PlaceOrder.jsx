@@ -9,6 +9,7 @@ import axios from 'axios'
 import {load} from '@cashfreepayments/cashfree-js';
 
 const PlaceOrder = () => {
+  let cashfree;
   let initializeSDK = async function () {
     cashfree = await load({
       mode: "production" // or sandbox
