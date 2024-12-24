@@ -6,10 +6,11 @@ import RelatedProducts from '../components/RelatedProducts';
 
 const Product = () => {
   const {productId} = useParams();
-  const {products,currency, addToCart} = useContext(ShopContext);
+  const {products,currency, addToCart,navigate} = useContext(ShopContext);
   const [productData,setProductData] = useState(false);
   const [image,setImage]= useState('');
   const [size, setSize] = useState('');
+  const [showGoToCart, setShowGoToCart] = useState(false);
 
   const fetchProductData = async()=>{
     products.map((item)=>{
@@ -70,7 +71,23 @@ const Product = () => {
           </div>
 
         </div>
-     <button onClick={()=>addToCart(productData._id,size)} className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700'>ADD TO CART</button>
+    <div>
+    {!showGoToCart &&( 
+      <button 
+      onClick={()=>{addToCart(productData._id,size); setShowGoToCart(true);}} 
+      className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700'>
+        ADD TO CART
+        </button>
+      )}
+    {showGoToCart && (
+        <button
+          onClick={() => navigate('/cart')}
+          className="bg-black text-white px-8 py-3 text-sm active:bg-gray-700 m-2"
+        >
+          GO TO CART
+        </button>
+      )}
+    </div>
      <hr className='mt-8 sm:w-4/5' />
 
      <div className='text-sm text-gray-500 mt-5 flex flex-col gap-1'>

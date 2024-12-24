@@ -6,7 +6,27 @@ import jwt from "jsonwebtoken";
 const createToken = (id)=>{
     return jwt.sign({id},process.env.JWT_SECRET);
 }
-//Route for user Login
+// Route to get user details
+const getUserDetails = async (req, res) => {
+    const { email } = req.body;  // Assuming email is sent in the body of the POST request
+    try {
+        const user = await userModel.findOne({ email });
+
+        if (!user) {
+            return res.json({ success: false, message: "User not found" });
+        }
+
+        // Return user details (excluding password for security)
+        const { password, ...userDetails } = user.toObject();
+        return res.json({ success: true, userDetails });
+    } catch (error) {
+        console.log(error);
+        return res.json({ success: false, message: error.message });
+    }
+}
+
+
+// Route for user Login
 const loginUser = async (req,res) => {
    try {
      const {email,password} = req.body;
@@ -18,7 +38,7 @@ const loginUser = async (req,res) => {
      
      if(isMatch){
         const token = createToken(user._id);
-        res.json({success:true,token})
+        res.json({success:true,token,email})
      }else{
         res.json({success:false, message:"Incorrect Password!"})
      }
@@ -79,4 +99,4 @@ const adminLogin = async (req,res) => {
     }
 }
 
-export { loginUser, registerUser, adminLogin};
+export { loginUser, registerUser, adminLogin, getUserDetails};

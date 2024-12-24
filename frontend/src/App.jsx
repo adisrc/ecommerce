@@ -17,6 +17,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Verify from './pages/Verify';
 import Terms from './pages/Terms';
 import Refund from './pages/Refund';
+import Profile from './pages/Profile';
 const App = () => {
   return (
     <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
@@ -36,6 +37,7 @@ const App = () => {
         <Route path='/verify' element={<Verify/>}/>
         <Route path='/terms' element={<Terms/>}/>
         <Route path='/refund' element={<Refund/>}/> 
+        <Route path='/profile' element={<Profile/>}/> 
       </Routes>
       <Footer/>
     </div>
