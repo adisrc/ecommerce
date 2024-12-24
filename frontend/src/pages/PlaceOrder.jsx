@@ -6,9 +6,11 @@ import { useState } from 'react'
 import { ShopContext } from '../context/ShopContext'
 import { toast } from 'react-toastify'
 import axios from 'axios'
+import { cashfree } from '../../util'  
 
 const PlaceOrder = () => {
   const [method,setMethod] = useState('cod');
+  const [orderId, setOrderId] = useState('');
   const{navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products} = useContext(ShopContext);
   const [formData, setFormData] = useState({
     firstName:'',
@@ -78,6 +80,39 @@ const PlaceOrder = () => {
         items:orderItems,
         amount:getCartAmount()+delivery_fee,
       }
+      const handleCashfree = async () =>{   
+        let paymentId=''; 
+        try { 
+          const response = await axios.post(backendUrl+'/api/order/cashfree',orderData,{headers:{token}}); 
+          
+          if(response && response.data.paymentId){
+            const orderId = response.data.orderId;
+             paymentId = response.data.paymentId;
+          }
+        
+        } catch (error) {
+          console.log(error.message); 
+        }
+        
+        let checkoutOptions = {
+          paymentSessionId: paymentId,
+          redirectTarger:'_modal',
+          returnUrl: "http://localhost:5173/verify?order_id={order_id}&method=cashfree", 
+        }
+        cashfree.checkout(checkoutOptions).then(function(result){
+          console.log(result);
+          
+          if(result.error){
+            alert(result.error.message)
+          }
+          if(result.redirect){
+            console.log("Redirection")
+          }
+        });  
+        
+        
+        
+      }
       
       switch (method) {
          //API Calls for COD
@@ -107,6 +142,10 @@ const PlaceOrder = () => {
               
             }
             break;
+            case 'cashfree': 
+             handleCashfree();
+              
+              break;
           default:
             break;
       }
@@ -169,6 +208,13 @@ const PlaceOrder = () => {
 
               </p>
               <img className='h-5 mx-4' src={assets.razorpay_logo} alt="" />
+
+            </div>
+            <div onClick={()=>setMethod('cashfree')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
+              <p className={`min-w-3.5 h-3.5 border rounded-full ${method==='cashfree'?'bg-green-400':''}`}>
+
+              </p>
+              <img className='h-7 mx-4' src={assets.cashfree_logo} alt="" />
 
             </div>
             <div onClick={()=>setMethod('cod')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>

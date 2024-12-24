@@ -10,10 +10,32 @@ const Verify = () => {
 
     const success = searchParams.get('success');
     const orderId = searchParams.get('orderId');
+    const order_id = searchParams.get('order_id');
+    const method = searchParams.get('method');
 
     const verifyPayment = async () => {
-        try {
-            if (!token) {
+        try { 
+            //For Cashfree
+             if(method=="cashfree"){  
+                const response = await axios.post(
+                    backendUrl + '/api/order/verifyCashfree',
+                    { order_id }, // Body (correct)
+                    { headers: { token } } // Headers (correct placement)
+                  );
+                  
+                console.log(response.data);
+                if (response.data.success) {
+                    console.log(response.data.success);
+                    setCartItems({})
+                    navigate('/orders')
+                }else{
+                    console.log(response.data.success);
+                    navigate('/cart')
+                }
+            }
+            //For Stripe
+            else{
+                if (!token) {
                 return null
             }
             const response = await axios.post(backendUrl+'/api/order/verifyStripe',{success,orderId},{headers:{token}});
@@ -27,6 +49,7 @@ const Verify = () => {
                 console.log(response.data.success);
                 navigate('/cart')
             }
+        }
 
         } catch (error) {
             console.log(error);
@@ -34,6 +57,7 @@ const Verify = () => {
         }
     }
     useEffect(() => {
+        if(token)
         verifyPayment()
     }, [token])
   return (

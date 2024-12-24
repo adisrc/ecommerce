@@ -3,6 +3,9 @@ import userModel from "../models/userModel.js";
 import axios from 'axios';
 import Stripe from 'stripe'
 import razorpay from 'razorpay'
+import dotenv from 'dotenv';
+dotenv.config();  // Load .env file
+
  
 //global varibales
 const currency = 'inr'
@@ -44,15 +47,91 @@ const placeOrder = async (req,res) => {
         
     }
 }
+// const headers = {
+//     'x-client-id': 'TEST103840945ee5a33303893f9fda0e49048301',
+//     'x-client-secret': 'cfsk_ma_test_9eea183ecd780999165ccf9690a7f9f4_5678e25c',
+//     'x-api-version': '2023-08-01',
+//     'Content-Type': 'application/json',
+//     'Accept':'application/json'
+//   };  
 
+const headers = {
+    'x-client-id': process.env.CASHFREE_CLIENT_ID,
+    'x-client-secret': process.env.CASHFREE_SECRET_KEY,
+    'x-api-version': '2023-08-01',
+    'Content-Type': 'application/json',
+    'Accept':'application/json'
+  };
+
+//   --------CASHFREEEEEEEEE_____________________________*******
 const placeOrderCashfree = async (req,res) =>{
+
+    const {address,items,amount,userId} = req.body;  
     try {
-        let version = cashfree.version();
-        console.log(version);
-        
+        const orderData = {
+            userId,
+            items,
+            address,
+            amount,
+            paymentMethod:"Cashfree",
+            payment:false,
+            date:Date.now()
+        }
+        const newOrder = new orderModel(orderData);
+        const savedOrder = await newOrder.save()
+      
+          const data = { 
+            order_amount: amount,
+            order_currency: currency.toUpperCase(),
+            order_id:savedOrder._id,
+            customer_details: {
+              customer_id: userId,
+              customer_name: address.firstName+" "+address.lastName,
+              customer_email: address.email,
+              customer_phone:  address.phone,
+            },
+            order_meta: {
+              return_url: 'https://www.yourwebsite.com/payment-response',
+            },
+          };
+            const response = await axios.post('https://api.cashfree.com/pg/orders', data, { headers }); 
+            
+            
+            res.json({success:true, message:"Order Created",orderId:savedOrder._id, paymentId:response.data.payment_session_id })
+         
     } catch (error) {
-        
+        console.log(error.message);
+        res.json({success:false, message:error.message});
     }
+}
+
+const verifyCashfree = async (req,res)=>{
+
+    const { order_id } = req.body;
+    try {  
+        
+             try {
+                const response = await axios.get(`https://api.cashfree.com/pg/orders/${order_id}`, { headers }); 
+                if (response.data.order_status==="PAID") {            
+                   const updatedOrder = await orderModel.findByIdAndUpdate(order_id, {payment:true});
+                   const userId = updatedOrder.userId;
+                   await userModel.findByIdAndUpdate(userId,{cartData:{}})
+                    res.json({success:true})
+                }else{
+                    
+                    await orderModel.findByIdAndDelete(order_id)
+                    res.json({success:false})
+                }
+            } catch (error) {
+                console.log(error.message);
+                res.json({success:false, message:error.message});
+            }
+         
+    } catch (error) {
+        console.log(error.message);
+        res.json({success:false, message:error.message});
+    }
+    
 }
 
 //Placing orders using stripe
@@ -224,4 +303,4 @@ const updateStatus = async (req,res) => {
     }
 }
 
-export {placeOrder,placeOrderCashfree,placeOrderStripe,placeOrderRazorpay,allOrders,userOrders,updateStatus,verifyStripe,verifyRazorpay}
+export {placeOrder,placeOrderCashfree,placeOrderStripe,placeOrderRazorpay,allOrders,userOrders,updateStatus,verifyStripe,verifyRazorpay,verifyCashfree}
