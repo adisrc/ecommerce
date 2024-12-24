@@ -97,7 +97,7 @@ const PlaceOrder = () => {
         let checkoutOptions = {
           paymentSessionId: paymentId,
           redirectTarger:'_modal',
-          returnUrl: "http://localhost:5173/verify?order_id={order_id}&method=cashfree", 
+          returnUrl: "https://adityatrend.vercel.app/verify?order_id={order_id}&method=cashfree", 
         }
         cashfree.checkout(checkoutOptions).then(function(result){
           console.log(result);
