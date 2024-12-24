@@ -71,16 +71,16 @@ const Product = () => {
 
         </div>
     <div>
-    {!showGoToCart &&( 
+    
       <button 
       onClick={()=>{addToCart(productData._id,size);}} 
        className="bg-black text-white px-8 py-3 text-sm active:bg-gray-700 m-2 w-42">
         ADD TO CART
         </button>
-      )}
+      
     {showGoToCart && (
         <button
-          onClick={() => navigate('/cart')}
+          onClick={() => {navigate('/cart'); setShowGoToCart(false)}}
           className="bg-black text-white px-8 py-3 text-sm active:bg-gray-700 m-2 w-42"
         >
           GO TO CART
