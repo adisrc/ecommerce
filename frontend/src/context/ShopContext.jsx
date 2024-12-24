@@ -15,6 +15,8 @@ const ShopContextProvider = (props)=>{
     const [cartItems, setCartItems] = useState({});
     const [products, setProducts] = useState([]);
     const [token,setToken] = useState('');
+    const [showGoToCart, setShowGoToCart] = useState(false);
+
     const navigate= useNavigate();
 
 
@@ -40,6 +42,7 @@ const ShopContextProvider = (props)=>{
         if (token) {
           try {
             await axios.post(backendUrl+"/api/cart/add",{itemId,size},{headers:{token}});
+            setShowGoToCart(true);
           } catch (error) {
             console.log(error);
             toast.error(error.message);
@@ -143,7 +146,7 @@ const ShopContextProvider = (props)=>{
       search, setSearch, showSearch, setShowSearch,
       cartItems,addToCart,getCartCount,updateQuantity,
       getCartAmount,navigate,backendUrl,
-      setToken,token,setCartItems
+      setToken,token,setCartItems,showGoToCart, setShowGoToCart
     }
 
     return (
