@@ -4,9 +4,6 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  server:{port:5173} ,
-  build: {
-    target: 'esnext', // or 'es2022', 'chrome90', 'firefox90', etc.
-  }, 
-
+  server:{port:5173}
+  
 })
