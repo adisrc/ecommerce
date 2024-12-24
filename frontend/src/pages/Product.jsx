@@ -73,15 +73,15 @@ const Product = () => {
     <div>
     
       <button 
-      onClick={()=>{addToCart(productData._id,size);}} 
-       className="bg-black text-white px-8 py-3 text-sm active:bg-gray-700 m-2 w-42">
+      onClick={()=>{addToCart(productData._id,size); }} 
+       className="bg-black text-white border-2 border-gray-200 rounded-full px-8 py-3 text-sm active:bg-gray-700 m-2 w-42">
         ADD TO CART
         </button>
       
     {showGoToCart && (
         <button
           onClick={() => {navigate('/cart'); setShowGoToCart(false)}}
-          className="bg-black text-white px-8 py-3 text-sm active:bg-gray-700 m-2 w-42"
+          className="bg-white text-black border-2 border-black rounded-full px-8 py-3 text-sm active:bg-gray-700 m-2 w-42"
         >
           GO TO CART
         </button>
