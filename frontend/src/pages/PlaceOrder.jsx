@@ -150,7 +150,12 @@ const PlaceOrder = () => {
             }
             break;
             case 'cashfree': 
+            if(token)
              handleCashfree();
+            else{
+              toast.error("Login First");
+              navigate('/login');
+            }
               
               break;
           default:
