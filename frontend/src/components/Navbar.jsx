@@ -15,9 +15,7 @@ const Navbar = () => {
   const logout = () => {
     navigate("/login");
     localStorage.removeItem("token");
-    setToken("");
-    localStorage.removeItem("access_token");
-    setAccessToken("");
+    setToken(""); 
     setCartItems({});
   };
   return (
