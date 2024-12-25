@@ -46,15 +46,7 @@ const placeOrder = async (req,res) => {
         res.json({success:false, message:error.message});
         
     }
-}
-// const headers = {
-//     'x-client-id': 'TEST103840945ee5a33303893f9fda0e49048301',
-//     'x-client-secret': 'cfsk_ma_test_9eea183ecd780999165ccf9690a7f9f4_5678e25c',
-//     'x-api-version': '2023-08-01',
-//     'Content-Type': 'application/json',
-//     'Accept':'application/json'
-//   };  
-
+} 
 const headers = {
     'x-client-id': process.env.CASHFREE_CLIENT_ID,
     'x-client-secret': process.env.CASHFREE_SECRET_KEY,

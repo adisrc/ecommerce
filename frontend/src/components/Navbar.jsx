@@ -9,13 +9,15 @@ const Navbar = () => {
     getCartCount,
     navigate,
     token,
-    setToken,
+    setToken,access_token,setAccessToken,
     setCartItems,
   } = useContext(ShopContext);
   const logout = () => {
     navigate("/login");
     localStorage.removeItem("token");
     setToken("");
+    localStorage.removeItem("access_token");
+    setAccessToken("");
     setCartItems({});
   };
   return (

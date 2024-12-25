@@ -15,6 +15,7 @@ const ShopContextProvider = (props)=>{
     const [cartItems, setCartItems] = useState({});
     const [products, setProducts] = useState([]);
     const [token,setToken] = useState('');
+    const [access_token, setAccessToken] = useState('');
     const [showGoToCart, setShowGoToCart] = useState(false);
 
     const navigate= useNavigate();
@@ -105,8 +106,25 @@ const ShopContextProvider = (props)=>{
     const getProductsData = async () => {
       try {
         const response = await axios.get(backendUrl+'/api/product/list');
+        
+        const apiKey = localStorage.getItem('access_token');
+ 
+        const printrove_response = await axios.get('https://api.printrove.com/api/external/products',{headers:{ 'Authorization': `Bearer ${apiKey}`}})
+        
+        const mergedProducts = [...response.data.products, ...printrove_response.data.products.map(product => ({
+          _id: product.id.toString(),
+          bestseller: true,  
+          category: "Men", // Change as needed
+          description: `This is a ${product.product.name} with a cool debug theme.`, // Modify as needed
+          image: [product.mockup.front_mockup, product.mockup.back_mockup], // Use the front mockup as the main image
+          name: product.name,
+          price: 349, // Example price, modify as required
+          sizes: ["M", "L", "XL"], // Modify based on available sizes from Printrove if needed
+          subCategory: "Topwear", // Modify as required
+        }))];        
+        
         if(response.data.success){
-          setProducts(response.data.products);
+          setProducts(mergedProducts);
         }
         else{
           toast.error(response.data.message);
@@ -146,7 +164,7 @@ const ShopContextProvider = (props)=>{
       search, setSearch, showSearch, setShowSearch,
       cartItems,addToCart,getCartCount,updateQuantity,
       getCartAmount,navigate,backendUrl,
-      setToken,token,setCartItems,showGoToCart, setShowGoToCart
+      setToken,token,access_token, setAccessToken,setCartItems,showGoToCart, setShowGoToCart
     }
 
     return (
