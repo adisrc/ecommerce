@@ -14,8 +14,7 @@ const ShopContextProvider = (props)=>{
     const [showSearch, setShowSearch] = useState(false);
     const [cartItems, setCartItems] = useState({});
     const [products, setProducts] = useState([]);
-    const [token,setToken] = useState('');
-    const [access_token, setAccessToken] = useState('');
+    const [token,setToken] = useState(''); 
     const [showGoToCart, setShowGoToCart] = useState(false);
 
     const navigate= useNavigate();
@@ -102,26 +101,13 @@ const ShopContextProvider = (props)=>{
       }
       return totalAmount;
     }
-    const getAccessToken = async () => {
-      if(localStorage.getItem('access-token')){return;}
-      const printrove_res = await axios.post('https://api.printrove.com/api/external/token',
-        {"email":import.meta.env.VITE_PRINTROVE_EMAIL,
-         "password": import.meta.env.VITE_PRINTROVE_PASSWORD
-        },
-        {
-         "Content-Type": "application/json",
-         "Accept": "application/json",
-        })
-       setAccessToken(printrove_res.data.access_token);  
-       localStorage.setItem('access_token',printrove_res.data.access_token);
-    }
-    
+     
     const getProductsData = async () => {
       try {
         const response = await axios.get(backendUrl+'/api/product/list');
         
-        const apiKey = localStorage.getItem('access_token');
- 
+        const apiKey = import.meta.env.VITE_PRINTROVE_AUTH_TOKEN 
+
         const printrove_response = await axios.get('https://api.printrove.com/api/external/products',{headers:{ 'Authorization': `Bearer ${apiKey}`}})
         
         const mergedProducts = [...response.data.products, ...printrove_response.data.products.map(product => ({
@@ -163,8 +149,7 @@ const ShopContextProvider = (props)=>{
     }
     
     useEffect(() => {
-      getAccessToken().then(()=>getProductsData())
-      
+      getProductsData(); 
     }, [])
 
     useEffect(() => {
