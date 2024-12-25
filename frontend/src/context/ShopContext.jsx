@@ -14,8 +14,8 @@ const ShopContextProvider = (props)=>{
     const [showSearch, setShowSearch] = useState(false);
     const [cartItems, setCartItems] = useState({});
     const [products, setProducts] = useState([]);
-    const [token,setToken] = useState(''); 
-    const [showGoToCart, setShowGoToCart] = useState(false);
+    const [token,setToken] = useState('');
+     const [showGoToCart, setShowGoToCart] = useState(false);
 
     const navigate= useNavigate();
 
@@ -164,7 +164,7 @@ const ShopContextProvider = (props)=>{
       search, setSearch, showSearch, setShowSearch,
       cartItems,addToCart,getCartCount,updateQuantity,
       getCartAmount,navigate,backendUrl,
-      setToken,token,access_token, setAccessToken,setCartItems,showGoToCart, setShowGoToCart
+      setToken,token,setCartItems,showGoToCart, setShowGoToCart
     }
 
     return (
