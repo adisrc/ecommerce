@@ -107,20 +107,30 @@ const ShopContextProvider = (props)=>{
         const response = await axios.get(backendUrl+'/api/product/list'); 
         const printrove_response = await axios.get('https://api.printrove.com/api/external/products',{headers:{ 'Authorization': `Bearer ${printroveKey}`}})
         
-        const mergedProducts = [...response.data.products, ...printrove_response.data.products.map(product => ({
-          _id: product.id.toString(),
+        const mergedProducts = [...response.data.products, ...printrove_response.data.products.map(product => {
+
+          let category = product.name.includes("Men") ? "Men" :
+               product.name.includes("Women") ? "Women" :
+               product.name.includes("Kids") ? "Kids" : "None";
+          let subCategory = product.name.includes("T-Shirt") ? "Topwear" :
+               product.name.includes("Lower") ? "Bottomwear" :
+               product.name.includes("Winter") ? "Winterwear" : "None";
+
+         return{ _id: product.id.toString(),
           bestseller: true,  
-          category: "Men", // Change as needed
-          description: `This is a ${product.product.name} with a cool debug theme.`, // Modify as needed
+          category: category, // Change as needed
+          description: `This is a ${product.product.name} with a cool theme "${product.name}"`, // Modify as needed
           image: [product.mockup.front_mockup, product.mockup.back_mockup], // Use the front mockup as the main image
           name: product.name,
           price: 349, // Example price, modify as required
           sizes: ["M", "L", "XL"], // Modify based on available sizes from Printrove if needed
-          subCategory: "Topwear", // Modify as required
-        }))];        
+          subCategory: subCategory, // Modify as required}
+        }})];        
         
         if(response.data.success){
           setProducts(mergedProducts);
+          console.log(mergedProducts);
+          
         }
         else{
           toast.error(response.data.message);
