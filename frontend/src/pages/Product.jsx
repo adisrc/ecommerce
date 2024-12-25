@@ -12,7 +12,7 @@ const Product = () => {
   const [size, setSize] = useState('');
 
   const fetchProductData = async()=>{
-    console.log(products);
+    // console.log(products);
     
    products.map((item)=>{
       if(item._id===productId){

@@ -131,7 +131,7 @@ const ShopContextProvider = (props)=>{
         
       } catch (error) {
         console.log(error);
-        toast.error(response.data.message);
+        toast.error(error.message);
         
       }
     }
