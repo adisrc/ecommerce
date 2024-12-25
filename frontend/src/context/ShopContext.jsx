@@ -10,6 +10,7 @@ const ShopContextProvider = (props)=>{
     const currency ='₹';
     const delivery_fee =0;
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    const printroveKey = import.meta.env.VITE_PRINTROVE_AUTH_TOKEN;
     const [search, setSearch] = useState('');
     const [showSearch, setShowSearch] = useState(false);
     const [cartItems, setCartItems] = useState({});
@@ -38,11 +39,10 @@ const ShopContextProvider = (props)=>{
           cartData[itemId][size]=1;
         }
         setCartItems(cartData);
-
+        setShowGoToCart(true);
         if (token) {
           try {
-            await axios.post(backendUrl+"/api/cart/add",{itemId,size},{headers:{token}});
-            setShowGoToCart(true);
+            await axios.post(backendUrl+"/api/cart/add",{itemId,size},{headers:{token}}); 
           } catch (error) {
             console.log(error);
             toast.error(error.message);
@@ -104,11 +104,8 @@ const ShopContextProvider = (props)=>{
      
     const getProductsData = async () => {
       try {
-        const response = await axios.get(backendUrl+'/api/product/list');
-        
-        const apiKey = import.meta.env.VITE_PRINTROVE_AUTH_TOKEN 
-
-        const printrove_response = await axios.get('https://api.printrove.com/api/external/products',{headers:{ 'Authorization': `Bearer ${apiKey}`}})
+        const response = await axios.get(backendUrl+'/api/product/list'); 
+        const printrove_response = await axios.get('https://api.printrove.com/api/external/products',{headers:{ 'Authorization': `Bearer ${printroveKey}`}})
         
         const mergedProducts = [...response.data.products, ...printrove_response.data.products.map(product => ({
           _id: product.id.toString(),
@@ -163,7 +160,7 @@ const ShopContextProvider = (props)=>{
       products, currency, delivery_fee,
       search, setSearch, showSearch, setShowSearch,
       cartItems,addToCart,getCartCount,updateQuantity,
-      getCartAmount,navigate,backendUrl,
+      getCartAmount,navigate,backendUrl,printroveKey,
       setToken,token,setCartItems,showGoToCart, setShowGoToCart
     }
 

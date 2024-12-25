@@ -9,7 +9,7 @@ const Navbar = () => {
     getCartCount,
     navigate,
     token,
-    setToken,access_token,setAccessToken,
+    setToken,
     setCartItems,
   } = useContext(ShopContext);
   const logout = () => {
