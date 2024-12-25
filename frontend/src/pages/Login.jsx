@@ -22,21 +22,10 @@ const Login = () => {
         }
       }else{
          const response = await axios.post(backendUrl+'/api/user/login',{email,password});
-         const printrove_response = await axios.post('https://api.printrove.com/api/external/token',
-         {"email":"aditprakash.77@gmail.com",
-          "password": "@dity@trend343"
-         },
-         {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-         })
-         
-         
-         if(response.data.success&&printrove_response.data.status){
+         if(response.data.success){
              setToken(response.data.token);
              localStorage.setItem('token',response.data.token);
-             setAccessToken(printrove_response.data.access_token);
-             localStorage.setItem('access_token',printrove_response.data.access_token);
+             
          }else{
             toast.error(response.data.message)
          }

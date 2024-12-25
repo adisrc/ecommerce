@@ -102,7 +102,20 @@ const ShopContextProvider = (props)=>{
       }
       return totalAmount;
     }
-
+    const getAccessToken = async () => {
+      if(localStorage.getItem('access-token')){return;}
+      const printrove_res = await axios.post('https://api.printrove.com/api/external/token',
+        {"email":import.meta.env.VITE_PRINTROVE_EMAIL,
+         "password": import.meta.env.VITE_PRINTROVE_PASSWORD
+        },
+        {
+         "Content-Type": "application/json",
+         "Accept": "application/json",
+        })
+       setAccessToken(printrove_res.data.access_token);  
+       localStorage.setItem('access_token',printrove_res.data.access_token);
+    }
+    
     const getProductsData = async () => {
       try {
         const response = await axios.get(backendUrl+'/api/product/list');
@@ -148,8 +161,10 @@ const ShopContextProvider = (props)=>{
         toast.error(response.data.message);
       }
     }
+    
     useEffect(() => {
-      getProductsData();
+      getAccessToken().then(()=>getProductsData())
+      
     }, [])
 
     useEffect(() => {
