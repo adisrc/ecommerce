@@ -8,10 +8,9 @@ const createToken = (id)=>{
 }
 // Route to get user details
 const getUserDetails = async (req, res) => {
-    const { email } = req.body;  // Assuming email is sent in the body of the POST request
+    const { userId } = req.body;  
     try {
-        const user = await userModel.findOne({ email });
-
+        const user = await userModel.findById(userId);
         if (!user) {
             return res.json({ success: false, message: "User not found" });
         }
@@ -82,6 +81,41 @@ const registerUser = async (req,res) => {
         res.json({success:false, message:error.message})
     }
 }
+
+//Route for Updating userDetails
+const updateUserDetails = async (req, res) => {
+    try {
+      const { userId, name, email, phone } = req.body;
+      const updateData = {};
+      if (name) updateData.name = name;
+      if (email && !validator.isEmail(email)) {
+        return res.json({ success: false, message: "Please enter a valid Email!" });
+    }
+      if (email) updateData.email = email;
+      if (phone && /^[0-9]{10}$/.test(phone)) {
+        updateData.phone = phone;
+      } else if (phone) {
+        return res.json({ success: false, message: "Please enter a valid 10-digit phone number!" });
+      } 
+  
+      if (Object.keys(updateData).length === 0) {
+        return res.json({ success: false, message: "No fields to update" });
+      }
+  
+      // Update the user with the provided data
+      const updatedUser = await userModel.findByIdAndUpdate(userId, updateData, { new: true });
+  
+      if (!updatedUser) {
+        return res.json({ success: false, message: "User not found" });
+      }
+  
+      res.json({ success: true, user: updatedUser });
+    } catch (error) {
+      console.error(error); // Log the error for debugging
+      res.status(500).json({ success: false, message: "Error updating user" });
+    }
+  };
+  
 //Route for admin login
 const adminLogin = async (req,res) => {
     try {
@@ -99,4 +133,4 @@ const adminLogin = async (req,res) => {
     }
 }
 
-export { loginUser, registerUser, adminLogin, getUserDetails};
+export { loginUser, registerUser, adminLogin, getUserDetails, updateUserDetails};

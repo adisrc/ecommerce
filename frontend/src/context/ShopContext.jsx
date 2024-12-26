@@ -16,14 +16,15 @@ const ShopContextProvider = (props)=>{
     const [cartItems, setCartItems] = useState({});
     const [products, setProducts] = useState([]);
     const [token,setToken] = useState('');
-     const [showGoToCart, setShowGoToCart] = useState(false);
+    const [showGoToCart, setShowGoToCart] = useState(false);
+    const [userData,  setUserData] = useState({});
 
     const navigate= useNavigate();
 
 
     const addToCart= async (itemId,size)=>{
         if(!size){
-          toast.error('Select Product Size');
+          toast.warn('Select Product Size');
           return;
         }
         let cartData = structuredClone(cartItems);
@@ -45,7 +46,7 @@ const ShopContextProvider = (props)=>{
             await axios.post(backendUrl+"/api/cart/add",{itemId,size},{headers:{token}}); 
           } catch (error) {
             console.log(error);
-            toast.error(error.message);
+            toast.warn(error.message);
             
           }
         }
@@ -128,9 +129,7 @@ const ShopContextProvider = (props)=>{
         }})];        
         
         if(response.data.success){
-          setProducts(mergedProducts);
-          console.log(mergedProducts);
-          
+          setProducts(mergedProducts);          
         }
         else{
           toast.error(response.data.message);
@@ -154,10 +153,20 @@ const ShopContextProvider = (props)=>{
         toast.error(response.data.message);
       }
     }
+
+    const getUserData = async (params) => {
+      try {
+        const response = await axios.post(backendUrl+'/api/user/get',{},{headers:{token}}); 
+        setUserData(response.data.userDetails); 
+      } catch (error) {
+        console.log(error.message); 
+      } 
+    }
     
     useEffect(() => {
       getProductsData(); 
-    }, [])
+      getUserData();
+    }, [token])
 
     useEffect(() => {
       if(!token&&localStorage.getItem('token')){
@@ -167,7 +176,7 @@ const ShopContextProvider = (props)=>{
     }, [])
 
     const value = {
-      products, currency, delivery_fee,
+      products, currency, delivery_fee,userData, setUserData,getUserData,
       search, setSearch, showSearch, setShowSearch,
       cartItems,addToCart,getCartCount,updateQuantity,
       getCartAmount,navigate,backendUrl,printroveKey,

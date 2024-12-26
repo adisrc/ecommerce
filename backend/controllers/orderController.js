@@ -47,6 +47,10 @@ const placeOrder = async (req,res) => {
         
     }
 }
+
+
+//   --------CASHFREEEEEEEEE_____________________________*******
+
 const cashfreeUrl = process.env.CASHFREE_MODE=='production'?'https://api.cashfree.com':'https://sandbox.cashfree.com';
 const headers = {
     'x-client-id': process.env.CASHFREE_MODE=='production'?process.env.CASHFREE_CLIENT_ID:process.env.CASHFREE_CLIENT_ID_TEST,
@@ -56,7 +60,6 @@ const headers = {
     'Accept':'application/json'
   };
 
-//   --------CASHFREEEEEEEEE_____________________________*******
 const placeOrderCashfree = async (req,res) =>{
 
     const {address,items,amount,userId} = req.body;  
