@@ -46,10 +46,11 @@ const placeOrder = async (req,res) => {
         res.json({success:false, message:error.message});
         
     }
-} 
+}
+const cashfreeUrl = process.env.CASHFREE_MODE=='production'?'https://api.cashfree.com':'https://sandbox.cashfree.com';
 const headers = {
-    'x-client-id': process.env.CASHFREE_CLIENT_ID,
-    'x-client-secret': process.env.CASHFREE_SECRET_KEY,
+    'x-client-id': process.env.CASHFREE_MODE=='production'?process.env.CASHFREE_CLIENT_ID:process.env.CASHFREE_CLIENT_ID_TEST,
+    'x-client-secret': process.env.CASHFREE_MODE=='production'?process.env.CASHFREE_SECRET_KEY:process.env.CASHFREE_SECRET_KEY_TEST,
     'x-api-version': '2023-08-01',
     'Content-Type': 'application/json',
     'Accept':'application/json'
@@ -86,7 +87,7 @@ const placeOrderCashfree = async (req,res) =>{
               return_url: 'https://www.yourwebsite.com/payment-response',
             },
           };
-            const response = await axios.post('https://api.cashfree.com/pg/orders', data, { headers }); 
+            const response = await axios.post(cashfreeUrl+'/pg/orders', data, { headers }); 
             
             
             res.json({success:true, message:"Order Created",orderId:savedOrder._id, paymentId:response.data.payment_session_id })
@@ -103,7 +104,7 @@ const verifyCashfree = async (req,res)=>{
     try {  
         
              try {
-                const response = await axios.get(`https://api.cashfree.com/pg/orders/${order_id}`, { headers }); 
+                const response = await axios.get(cashfreeUrl+`/pg/orders/${order_id}`, { headers }); 
                 if (response.data.order_status==="PAID") {            
                    const updatedOrder = await orderModel.findByIdAndUpdate(order_id, {payment:true});
                    const userId = updatedOrder.userId;

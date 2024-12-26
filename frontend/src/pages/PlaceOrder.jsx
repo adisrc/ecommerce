@@ -12,7 +12,7 @@ const PlaceOrder = () => {
   let cashfree;
   let initializeSDK = async function () {
     cashfree = await load({
-      mode: "production" // or sandbox
+      mode: "sandbox" // or production
     });
   }
   initializeSDK();
@@ -90,8 +90,7 @@ const PlaceOrder = () => {
       const handleCashfree = async () =>{   
         let paymentId=''; 
         try { 
-          const response = await axios.post(backendUrl+'/api/order/cashfree',orderData,{headers:{token}}); 
-          
+          const response = await axios.post(backendUrl+'/api/order/cashfree',orderData,{headers:{token}});  
           if(response && response.data.paymentId){
             const orderId = response.data.orderId;
              paymentId = response.data.paymentId;
