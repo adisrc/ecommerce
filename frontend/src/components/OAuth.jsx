@@ -4,6 +4,7 @@ import {GoogleAuthProvider, signInWithPopup, getAuth} from 'firebase/auth';
 import { app } from '../firebase';
 import { ShopContext } from '../context/ShopContext';
 import axios from 'axios'
+import { toast } from 'react-toastify';
 
 const OAuth = () => {
     const {backendUrl,token,setToken} = useContext(ShopContext);
