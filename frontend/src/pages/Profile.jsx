@@ -247,7 +247,8 @@ function Profile() {
           <img className="w-[100px] rounded-full mx-auto mt-4 border-green-400 border-2" src={userData.photoURL||assets.profile2} alt="" />
             <h1 className="text-center p-3 font-semibold">Hi, {userData.name}</h1>
             <ul className="text-gray-600 bg-white border-gray-200">
-              <hr /><li
+              <hr />
+              <li
                 onClick={() => setTab("Personal Information")}
                 className={`${
                   tab === "Personal Information" ? "bg-gray-200 text-black" : ""
@@ -275,7 +276,7 @@ function Profile() {
               <hr />
             </ul>
           </div>
-          <div className="p-5 bg-gray-200 flex flex-col w-full rounded-lg">
+          <div className="p-5 bg-gray-200 flex flex-col w-full rounded-lg my-auto">
             <h1 className="text-sm">{tab}</h1>
             {tab === "Personal Information" ? renderPersonalInfo() : <div>Content for {tab}</div>}
           </div>
