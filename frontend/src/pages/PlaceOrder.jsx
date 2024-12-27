@@ -16,8 +16,8 @@ const PlaceOrder = () => {
     });
   }
   initializeSDK();
+  const returnURL = import.meta.env.VITE_CASHFREE_MODE==="sandbox"?"http://localhost:5173":"https://adityatrend.vercel.app";
   const [method,setMethod] = useState('cod');
-  const [orderId, setOrderId] = useState('');
   const{navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products} = useContext(ShopContext);
   const [formData, setFormData] = useState({
     firstName:'',
@@ -87,38 +87,43 @@ const PlaceOrder = () => {
         items:orderItems,
         amount:getCartAmount()+delivery_fee,
       }
-      const handleCashfree = async () =>{   
-        let paymentId=''; 
+      const handleCashfree = async () => {   
         try { 
-          const response = await axios.post(backendUrl+'/api/order/cashfree',orderData,{headers:{token}});  
-          if(response && response.data.paymentId){
-            const orderId = response.data.orderId;
-             paymentId = response.data.paymentId;
+          // Initiating payment request
+          const { data } = await axios.post(backendUrl+"/api/order/cashfree", orderData, {
+            headers: { token },
+          });
+      
+          if (!data || !data.paymentId || !data.orderId) {
+            throw new Error("Invalid payment data received from the server.");
           }
-        
+      
+          const paymentId = data.paymentId;
+      
+          // Prepare Cashfree checkout options
+          const checkoutOptions = {
+            paymentSessionId: paymentId,
+            redirectTarget: '_self', // Correct typo
+            returnUrl: returnURL+"/verify?order_id={order_id}&method=cashfree",
+          };
+      
+          // Start Cashfree checkout process
+          cashfree.checkout(checkoutOptions).then((result) => {
+            if (result.error) {
+              console.error("Cashfree Checkout Error:", result.error.message);
+              alert(`Payment Error: ${result.error.message}`);
+            } else if (result.redirect) {
+              console.log("Redirection in process");
+
+            } else {
+              console.log("Payment Completed Successfully", result);
+            }
+          });
         } catch (error) {
-          console.log(error.message); 
+          console.error("Error during payment processing:", error.message);
+          alert("An error occurred while processing your payment. Please try again.");
         }
-        
-        let checkoutOptions = {
-          paymentSessionId: paymentId,
-          redirectTarger:'_modal',
-          returnUrl: "https://adityatrend.vercel.app/verify?order_id={order_id}&method=cashfree", 
-        }
-        cashfree.checkout(checkoutOptions).then(function(result){
-          console.log(result);
-          
-          if(result.error){
-            alert(result.error.message)
-          }
-          if(result.redirect){
-            console.log("Redirection")
-          }
-        });  
-        
-        
-        
-      }
+      };
       
       switch (method) {
          //API Calls for COD
