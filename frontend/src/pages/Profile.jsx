@@ -130,13 +130,13 @@ function Profile() {
           />
           <div className="flex">
             <button
-              className="bg-black rounded-lg w-1/2 text-white mt-4 px-2 mr-2"
+              className="bg-gray-800 h-10 rounded-lg w-1/2 text-white mt-4 px-2 mr-2"
               onClick={updateProfile}
             >
               Update
             </button>
             <button
-              className="bg-black rounded-lg w-1/2 text-white mt-4 px-2"
+              className="bg-gray-800 h-10 rounded-lg w-1/2 text-white mt-4 px-2"
               onClick={() => setIsEditing(false)}
             >
               Cancel
@@ -166,13 +166,13 @@ function Profile() {
           </div>
           <div className="flex">
             <button
-              className="bg-black rounded-lg w-1/2 text-white mt-4 px-2 mr-2"
+              className="bg-gray-800 h-10 rounded-lg w-1/2 text-white mt-4 px-2 mr-2"
               onClick={resetPassword}
             >
               Reset
             </button>
             <button
-              className="bg-black rounded-lg w-1/2 text-white mt-4 px-2"
+              className="bg-gray-800 h-10 rounded-lg w-1/2 text-white mt-4 px-2"
               onClick={() => setIsResettingPass(false)}
             >
               Cancel
@@ -203,7 +203,7 @@ function Profile() {
         </h1>
         <div className="flex">
         <button
-          className="bg-black rounded-lg w-1/2 text-white mt-4 mx-2"
+          className="bg-gray-800 h-10 rounded-lg w-1/2 text-white mt-4 mx-2"
           onClick={() => {
             setFormData({
               name: userData.name,
@@ -217,7 +217,7 @@ function Profile() {
           Update Profile
         </button>
         <button
-          className="bg-black rounded-lg w-1/2 text-white mt-4 mx-2"
+          className="bg-gray-800 h-10 rounded-lg w-1/2 text-white mt-4 mx-2"
           onClick={() => { setIsResettingPass(true) }}
         >
           Reset Password
