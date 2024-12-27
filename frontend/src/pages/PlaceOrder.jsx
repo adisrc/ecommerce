@@ -12,7 +12,7 @@ const PlaceOrder = () => {
   let cashfree;
   let initializeSDK = async function () {
     cashfree = await load({
-      mode: "sandbox" // or production
+      mode: import.meta.env.VITE_CASHFREE_MODE // or production
     });
   }
   initializeSDK();
