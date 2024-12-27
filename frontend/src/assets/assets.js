@@ -59,6 +59,8 @@ import logo from './logo.png'
 import google from './google.png'
 import cashfree_logo from './cashfree_logo.png'
 import hero_img from './hero_img.png'
+import hero_img2 from './hero_img2.png'
+import hero_img3 from './hero_img3.png'
 import cart_icon from './cart_icon.png'
 import bin_icon from './bin_icon.png'
 import dropdown_icon from './dropdown_icon.png'
@@ -87,6 +89,8 @@ export const assets = {
     cashfree_logo,
     logo,
     hero_img,
+    hero_img2,
+    hero_img3,
     cart_icon,
     dropdown_icon,
     exchange_icon,
