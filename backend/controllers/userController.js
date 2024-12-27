@@ -80,6 +80,47 @@ const registerUser = async (req,res) => {
         res.json({success:false, message:error.message})
     }
 }
+//Continue with GOOGLE
+const continueWithGoogle = async (req, res) => {
+  try {
+    const { name, email, photoURL } = req.body;
+
+    // Check if the user already exists
+    const existingUser = await userModel.findOne({ email });
+    if (existingUser) { 
+      if(!existingUser.photoURL){
+        await userModel.updateOne(
+          { email }, // Match the user by email
+          { $set: { photoURL: photoURL } } // Update the photoURL field
+        );
+      }
+      const token = createToken(existingUser._id);
+      return res.json({ success: true, token, email });
+    }
+    // Generate a random password
+    const password = Math.random().toString(36).slice(-8);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create and save the new user
+    const newUser = new userModel({
+      name,
+      email,
+      password: hashedPassword,
+      photoURL,
+    });
+    const savedUser = await newUser.save();
+
+    // Generate a token for the new user
+    const token = createToken(savedUser._id);
+
+    res.json({ success: true, token, email });
+  } catch (error) {
+    console.error("Error:", error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 
 //Route for Updating userDetails
 const updateUserDetails = async (req, res) => {
@@ -133,4 +174,4 @@ const adminLogin = async (req,res) => {
     }
 }
 
-export { loginUser, registerUser, adminLogin, getUserDetails, updateUserDetails};
+export { loginUser, registerUser, adminLogin, getUserDetails, updateUserDetails, continueWithGoogle};

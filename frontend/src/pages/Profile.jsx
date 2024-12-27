@@ -3,6 +3,7 @@ import { ShopContext } from "../context/ShopContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Title from "../components/Title";
+import { assets } from "../assets/assets";
 
 function Profile() {
   const {
@@ -61,13 +62,14 @@ function Profile() {
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick);
     };
-  }, []);
+  }, []); 
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const renderPersonalInfo = () => {
+    
     if (isEditing) {
       return (
         <>
@@ -100,7 +102,7 @@ function Profile() {
             placeholder={userData.email || "username@example.com"}
           />
           <input
-            value={formData.phone}
+            value={"+91 "+formData.phone}
             onChange={(e) => {
               const value = e.target.value.replace(/\D/g, ""); // Restrict to digits only
               if (value.length <= 10) handleInputChange("phone", value);
@@ -181,8 +183,9 @@ function Profile() {
           <div className={` absolute top-0 left-0 bottom-0 overflow-hidden bg-white sm:border-gray-300 border-2 transition-all 
           ${visible ? "w-3/4" : "w-0" }
                sm:w-1/2 sm:relative sm:rounded-lg sm: mr-2`}
-          >
-            <h1 className="p-3 font-semibold">Hi, {userData.name}</h1>
+          > 
+          <img className="w-[100px] rounded-full mx-auto mt-4 border-green-400 border-2" src={userData.photoURL||assets.profile2} alt="" />
+            <h1 className="text-center p-3 font-semibold">Hi, {userData.name}</h1>
             <ul className="text-gray-600 bg-white border-gray-200">
               <hr /><li
                 onClick={() => setTab("Personal Information")}
@@ -198,8 +201,7 @@ function Profile() {
                 className={`${
                   tab === "Manage Addresses" ? "bg-gray-200 text-black" : ""
                 } pl-3 hover:text-black cursor-pointer p-1`}
-              >
-                Manage Addresses
+              > Manage Addresses
               </li>
               <hr />
               <li
