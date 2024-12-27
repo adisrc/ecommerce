@@ -25,17 +25,17 @@ function Profile() {
   // Update Profile API Call
   const updateProfile = async () => {
     try {
-      const { name, email, phone } = formData;
+      const { name,gender, email, phone } = formData;
 
       // Check for unchanged fields
-      if (name === userData.name && email === userData.email && phone === userData.phone) {
+      if (name === userData.name && email === userData.email && phone === userData.phone && gender===userData.gender) {
         toast.warn("No changes made to update!");
         return;
       }
 
       const response = await axios.post(
         `${backendUrl}/api/user/update`,
-        { name, email, phone },
+        { name,gender, email, phone },
         { headers: { token } }
       );
 
@@ -55,12 +55,9 @@ function Profile() {
   // Handle outside click to close the sidebar
   useEffect(() => {
     const handleOutsideClick = (event) => {
-       setVisible(false);
-      
-    };
-
-    document.addEventListener("mousedown", handleOutsideClick);
-
+       setVisible(false); 
+    }; 
+    document.addEventListener("mousedown", handleOutsideClick); 
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick);
     };
@@ -74,17 +71,31 @@ function Profile() {
     if (isEditing) {
       return (
         <>
-          <input
-            value={formData.name}
-            onChange={(e) => handleInputChange("name", e.target.value)}
-            className="font-bold px-4 bg-white rounded-lg mt-2 text-gray-800"
-            type="text"
-            placeholder={userData.name || "Enter Your Name"}
-          />
+          <div className="md:flex md:space-x-2">
+            <input
+              value={formData.name}
+              onChange={(e) => handleInputChange("name", e.target.value)}
+              className="md:w-2/3 font-bold px-4 bg-white rounded-lg mt-2 text-gray-800 p-2"
+              type="text"
+              placeholder={userData.name || "Enter Your Name"}
+            />
+            <select
+              value={formData.gender}
+              onChange={(e) => handleInputChange("gender", e.target.value)}
+              className="md:w-1/3 font-bold px-4 bg-white rounded-lg mt-2 text-gray-800 p-2"
+            >
+              <option value="" disabled>
+                {userData.gender || "Select Gender"}
+              </option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
           <input
             value={formData.email}
             onChange={(e) => handleInputChange("email", e.target.value)}
-            className="font-bold px-4 bg-white rounded-lg mt-2 text-gray-800"
+            className="font-bold px-4 bg-white rounded-lg mt-2 text-gray-800 p-2"
             type="email"
             placeholder={userData.email || "username@example.com"}
           />
@@ -94,7 +105,7 @@ function Profile() {
               const value = e.target.value.replace(/\D/g, ""); // Restrict to digits only
               if (value.length <= 10) handleInputChange("phone", value);
             }}
-            className="font-bold px-4 bg-white rounded-lg mt-2 text-gray-800"
+            className="font-bold px-4 bg-white rounded-lg mt-2 text-gray-800 p-2"
             type="text"
             placeholder={userData.phone || "99XXXXXX00"}
           />
@@ -118,13 +129,18 @@ function Profile() {
 
     return (
       <>
-        <h1 className="font-bold px-4 bg-white rounded-lg mt-2 text-gray-800">
+        <div className="md:flex md:space-x-2">
+        <h1 className="md:w-2/3 font-bold px-4 bg-white rounded-lg mt-2 text-gray-800 p-2">
           Name: <span className="font-normal">{userData.name}</span>
         </h1>
-        <h1 className="font-bold px-4 bg-white rounded-lg mt-2 text-gray-800">
+        <h1 className="md:w-1/3 font-bold px-4 bg-white rounded-lg mt-2 text-gray-800 p-2">
+          Gender: <span className="font-normal">{userData.gender}</span>
+        </h1>
+        </div>
+        <h1 className="font-bold px-4 bg-white rounded-lg mt-2 text-gray-800 p-2">
           Email: <span className="font-normal">{userData.email}</span>
         </h1>
-        <h1 className="font-bold px-4 bg-white rounded-lg mt-2 text-gray-800">
+        <h1 className="font-bold px-4 bg-white rounded-lg mt-2 text-gray-800 p-2">
           Phone:{" "}
           <span className="font-normal">
             {userData.phone || "Update Profile to add phone"}
@@ -135,6 +151,7 @@ function Profile() {
           onClick={() => {
             setFormData({
               name: userData.name,
+              gender:userData.gender||"Not Specified",
               email: userData.email,
               phone: userData.phone || "",
             });

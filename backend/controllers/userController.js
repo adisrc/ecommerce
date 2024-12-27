@@ -46,7 +46,6 @@ const loginUser = async (req,res) => {
     console.log(error);
     res.json({success:false, message:error.message})
    }
-    
 }
 //Route for user Registration
 const registerUser = async (req,res) => {
@@ -85,9 +84,10 @@ const registerUser = async (req,res) => {
 //Route for Updating userDetails
 const updateUserDetails = async (req, res) => {
     try {
-      const { userId, name, email, phone } = req.body;
+      const { userId, name,gender, email, phone } = req.body;
       const updateData = {};
       if (name) updateData.name = name;
+      if(gender) updateData.gender = gender;
       if (email && !validator.isEmail(email)) {
         return res.json({ success: false, message: "Please enter a valid Email!" });
     }
