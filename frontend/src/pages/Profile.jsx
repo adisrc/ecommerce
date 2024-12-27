@@ -20,6 +20,9 @@ function Profile() {
     phone: "",
   });
   const [isEditing, setIsEditing] = useState(false);
+  const [isResettingPass, setIsResettingPass] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [tab, setTab] = useState("Personal Information");
   const [visible, setVisible] = useState(false);
 
@@ -52,6 +55,20 @@ function Profile() {
       toast.error("Something went wrong! Please try again.");
     }
   };
+
+  const resetPassword = async () => {
+   try {
+    const response =await axios.post(backendUrl+'/api/user/resetpass',{password:newPassword},{headers:{token}}); 
+    if(response.data.success){
+      toast.success(response.data.message);
+    }else{
+      toast.warn(response.data.message);
+    } 
+   } catch (error) {
+    console.log(error.message);
+    toast.error(error.message);
+   }
+  }
 
   // Handle outside click to close the sidebar
   useEffect(() => {
@@ -86,8 +103,8 @@ function Profile() {
               onChange={(e) => handleInputChange("gender", e.target.value)}
               className="md:w-1/3 font-bold px-4 bg-white rounded-lg mt-2 text-gray-800 p-2"
             >
-              <option value="" disabled>
-                {userData.gender || "Select Gender"}
+              <option value="">
+                {"Select Gender"}
               </option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
@@ -102,7 +119,7 @@ function Profile() {
             placeholder={userData.email || "username@example.com"}
           />
           <input
-            value={"+91 "+formData.phone}
+            value={formData.phone}
             onChange={(e) => {
               const value = e.target.value.replace(/\D/g, ""); // Restrict to digits only
               if (value.length <= 10) handleInputChange("phone", value);
@@ -121,6 +138,42 @@ function Profile() {
             <button
               className="bg-black rounded-lg w-1/2 text-white mt-4 px-2"
               onClick={() => setIsEditing(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </>
+      );
+    }
+    if(isResettingPass){
+      return (
+        <>
+          <div className="relative w-full">
+            <input
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="font-bold px-4 bg-white rounded-lg mt-2 text-gray-800 p-2 w-full pr-12"
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter New Password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-2 px-2 text-sm text-gray-600 hover:text-gray-800"
+            >
+              <img className="w-7 pt-2" src={showPassword?assets.hidepass:assets.showpass} alt="" />
+            </button>
+          </div>
+          <div className="flex">
+            <button
+              className="bg-black rounded-lg w-1/2 text-white mt-4 px-2 mr-2"
+              onClick={resetPassword}
+            >
+              Reset
+            </button>
+            <button
+              className="bg-black rounded-lg w-1/2 text-white mt-4 px-2"
+              onClick={() => setIsResettingPass(false)}
             >
               Cancel
             </button>
@@ -148,12 +201,13 @@ function Profile() {
             {userData.phone || "Update Profile to add phone"}
           </span>
         </h1>
+        <div className="flex">
         <button
-          className="bg-black rounded-lg w-1/2 text-white mt-4"
+          className="bg-black rounded-lg w-1/2 text-white mt-4 mx-2"
           onClick={() => {
             setFormData({
               name: userData.name,
-              gender:userData.gender||"Not Specified",
+              gender:userData.gender||"N/A",
               email: userData.email,
               phone: userData.phone || "",
             });
@@ -162,6 +216,13 @@ function Profile() {
         >
           Update Profile
         </button>
+        <button
+          className="bg-black rounded-lg w-1/2 text-white mt-4 mx-2"
+          onClick={() => { setIsResettingPass(true) }}
+        >
+          Reset Password
+        </button>
+        </div>
       </>
     );
   };

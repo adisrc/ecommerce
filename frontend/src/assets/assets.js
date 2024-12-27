@@ -76,9 +76,13 @@ import razorpay_logo from './razorpay_logo.png'
 import stripe_logo from './stripe_logo.png'
 import cross_icon from './cross_icon.png'
 import profile2 from './profile2.png'
+import showpass from './showpass.png'
+import hidepass from './hidepass.png'
+
 
 export const assets = {
     profile2,
+    showpass,hidepass,
     google,
     cashfree_logo,
     logo,

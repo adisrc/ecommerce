@@ -80,6 +80,25 @@ const registerUser = async (req,res) => {
         res.json({success:false, message:error.message})
     }
 }
+
+//RESET passowrd
+const resetPassword = async (req,res) => {
+  try {
+    const {password, userId} = req.body;
+    if (password.length<8) {
+      return res.json({success:false, message:"Password is too short!"})
+     }
+      // hasing user password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+  
+    const user = await userModel.findByIdAndUpdate(userId,{password:hashedPassword});
+    if(!user) return res.json({success:false, message:"User not found!"});
+    res.json({success:true,message:"Hi, "+user.name+" Passowrd updated successfully!"})
+  } catch (error) {
+    res.json({success:false,message:error.message})
+  } 
+}
 //Continue with GOOGLE
 const continueWithGoogle = async (req, res) => {
   try {
@@ -174,4 +193,4 @@ const adminLogin = async (req,res) => {
     }
 }
 
-export { loginUser, registerUser, adminLogin, getUserDetails, updateUserDetails, continueWithGoogle};
+export { loginUser, registerUser, adminLogin, getUserDetails, updateUserDetails, continueWithGoogle, resetPassword};
