@@ -11,7 +11,6 @@ function Profile() {
     token,
     userData,
     setUserData,
-    navigate,
   } = useContext(ShopContext);
 
   const [formData, setFormData] = useState({
@@ -25,6 +24,9 @@ function Profile() {
   const [showPassword, setShowPassword] = useState(false);
   const [tab, setTab] = useState("Personal Information");
   const [visible, setVisible] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState(undefined);
+
+  const fileRef = useRef(null)
 
   // Update Profile API Call
   const updateProfile = async () => {
@@ -80,6 +82,45 @@ function Profile() {
       document.removeEventListener("mousedown", handleOutsideClick);
     };
   }, []); 
+
+  useEffect(() => {
+    if(profilePhoto){ 
+      handleImageUpload(); }
+  }, [profilePhoto])
+
+  const handleImageUpload = async (todo) => {
+    try { 
+      const formData = new FormData();
+      formData.append('image', profilePhoto); 
+      const response = await axios.post(backendUrl+"/api/user/upload-photo",formData,{headers:{token}});
+      if(response.data.success){ 
+        setUserData((prevData) => ({
+          ...prevData, 
+          photoURL: response.data.photoURL,
+        }));
+        toast.success("Profile Photo Updated!")
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message)
+    }
+  }
+  const handleImageDelete = async () => {
+    try {
+      const image = userData.photoURL;
+      const response = await axios.post(backendUrl+"/api/user/delete-photo",{image},{headers:{token}});
+      if(response.data.success){ 
+        setUserData((prevData) => ({
+          ...prevData, 
+          photoURL: response.data.photoURL,
+        }));
+        toast.success("Profile Photo Deleted!")
+      } 
+    } catch (error) {
+      console.log(error.message);
+      toast.error(error.message)
+    }
+  }
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -237,49 +278,90 @@ function Profile() {
           <button
             onClick={() => setVisible(!visible)}
             className="border-white border-2 bg-gray-400 rounded-r text-4xl w-8 text-center pb-1 absolute left-0 sm:hidden"
-          > ≡
+          >
+            {" "}
+            ≡
           </button>
-          <div className="flex"> 
-          <div className={` absolute top-0 left-0 bottom-0 overflow-hidden bg-white sm:border-gray-300 border-2 transition-all 
-          ${visible ? "w-3/4" : "w-0" }
+          <div className="flex">
+            <div
+              className={` absolute top-0 left-0 bottom-0 overflow-hidden bg-white sm:border-gray-300 border-2 transition-all 
+          ${visible ? "w-3/4" : "w-0"}
                sm:w-1/2 sm:relative sm:rounded-lg sm: mr-2`}
-          > 
-          <img className="w-[100px] rounded-full mx-auto mt-4 border-green-400 border-2" src={userData.photoURL||assets.profile2} alt="" />
-            <h1 className="text-center p-3 font-semibold">Hi, {userData.name}</h1>
-            <ul className="text-gray-600 bg-white border-gray-200">
-              <hr />
-              <li
-                onClick={() => setTab("Personal Information")}
-                className={`${
-                  tab === "Personal Information" ? "bg-gray-200 text-black" : ""
-                } pl-3 hover:text-black cursor-pointer p-1`}
-              >
-                Personal Information
-              </li>
-              <hr />
-              <li
-                onClick={() => setTab("Manage Addresses")}
-                className={`${
-                  tab === "Manage Addresses" ? "bg-gray-200 text-black" : ""
-                } pl-3 hover:text-black cursor-pointer p-1`}
-              > Manage Addresses
-              </li>
-              <hr />
-              <li
-                onClick={() => setTab("Your Reviews")}
-                className={`${
-                  tab === "Your Reviews" ? "bg-gray-200 text-black" : ""
-                } pl-3 hover:text-black cursor-pointer p-1`}
-              >
-                Your Reviews
-              </li>
-              <hr />
-            </ul>
-          </div>
-          <div className="p-5 bg-gray-200 flex flex-col w-full rounded-lg my-auto">
-            <h1 className="text-sm">{tab}</h1>
-            {tab === "Personal Information" ? renderPersonalInfo() : <div>Content for {tab}</div>}
-          </div>
+            >
+              <input
+                onChange={(e) => setProfilePhoto(e.target.files[0])}
+                type="file"
+                ref={fileRef}
+                hidden
+                accept="image/*"
+              />
+
+              <div className="group relative">
+                <img
+                  onClick={() => fileRef.current.click()}
+                  className="w-[100px] h-[100px] object-cover rounded-full mx-auto mt-4 border-2 
+                 border-green-400 cursor-pointer hover:brightness-75 transition duration-300 ease-in-out"
+                  src={userData.photoURL || assets.profile2}
+                  alt="Profile"
+                />
+
+                {userData.photoURL && (
+                  <button
+                    className="absolute top-2 right-20 bg-black text-white text-xs 
+                    rounded-full w-[30px] h-[30px] flex items-center justify-center
+                    opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out"
+                    onClick={handleImageDelete}
+                  >
+                    ╳
+                  </button>
+                )}
+              </div>
+
+              <h1 className="text-center p-3 font-semibold">
+                Hi, {userData.name}
+              </h1>
+              <ul className="text-gray-600 bg-white border-gray-200">
+                <hr />
+                <li
+                  onClick={() => setTab("Personal Information")}
+                  className={`${
+                    tab === "Personal Information"
+                      ? "bg-gray-200 text-black"
+                      : ""
+                  } pl-3 hover:text-black cursor-pointer p-1`}
+                >
+                  Personal Information
+                </li>
+                <hr />
+                <li
+                  onClick={() => setTab("Manage Addresses")}
+                  className={`${
+                    tab === "Manage Addresses" ? "bg-gray-200 text-black" : ""
+                  } pl-3 hover:text-black cursor-pointer p-1`}
+                >
+                  {" "}
+                  Manage Addresses
+                </li>
+                <hr />
+                <li
+                  onClick={() => setTab("Your Reviews")}
+                  className={`${
+                    tab === "Your Reviews" ? "bg-gray-200 text-black" : ""
+                  } pl-3 hover:text-black cursor-pointer p-1`}
+                >
+                  Your Reviews
+                </li>
+                <hr />
+              </ul>
+            </div>
+            <div className="p-5 bg-gray-200 flex flex-col w-full rounded-lg my-auto">
+              <h1 className="text-sm">{tab}</h1>
+              {tab === "Personal Information" ? (
+                renderPersonalInfo()
+              ) : (
+                <div>Content for {tab}</div>
+              )}
+            </div>
           </div>
         </>
       ) : (

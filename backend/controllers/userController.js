@@ -2,6 +2,7 @@ import userModel from "../models/userModel.js";
 import validator from "validator";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import {v2 as cloudinary} from "cloudinary"
 
 const createToken = (id)=>{
     return jwt.sign({id},process.env.JWT_SECRET);
@@ -176,6 +177,60 @@ const updateUserDetails = async (req, res) => {
     }
   };
   
+//Route for profile photo upload
+export const uploadProfilePhoto = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No file uploaded" });
+    }
+    const { userId } = req.body;
+    if (!userId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User ID is required" });
+    }
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    if (user.photoURL && user.photoURL.includes("res.cloudinary.com")) {
+      const publicId = user.photoURL.split("/").pop().split(".")[0];
+      await cloudinary.uploader.destroy(publicId);
+    }
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      resource_type: "image",
+    });
+    user.photoURL = result.secure_url;
+    await user.save();
+    res.json({
+      success: true,
+      message: "Image uploaded successfully",
+      photoURL: user.photoURL,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+export const deleteProfilePhoto = async (req,res) => {
+try {
+  const {image, userId} = req.body;
+  if (image && image.includes("res.cloudinary.com")) {
+    const publicId = image.split("/").pop().split(".")[0];
+    await cloudinary.uploader.destroy(publicId);
+  }
+  const user = await userModel.findByIdAndUpdate(userId,{photoURL:null},{new:true})
+  res.json({success:true,photoURL:user.photoURL}) 
+} catch (error) {
+  res.json({success:false, message:error.message})
+}
+}
+
 //Route for admin login
 const adminLogin = async (req,res) => {
     try {
