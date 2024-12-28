@@ -309,7 +309,7 @@ function Profile() {
                   <button
                     className=" bg-black text-white text-xs
                     rounded-full w-[30px] h-[30px] 
-                    sm:hidden group-hover:block absolute"
+                    sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute"
                     onClick={handleImageDelete}
                   >
                     ╳
