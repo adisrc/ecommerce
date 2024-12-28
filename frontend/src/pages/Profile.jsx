@@ -296,10 +296,10 @@ function Profile() {
                 accept="image/*"
               />
 
-              <div className="group relative">
+              <div className="group flex w-[130px] mx-auto mt-4">
                 <img
-                  onClick={() => fileRef.current.click()}
-                  className="w-[100px] h-[100px] object-cover rounded-full mx-auto mt-4 border-2 
+                  onClick={() => {fileRef.current.click()}}
+                  className="w-[100px] h-[100px] object-cover rounded-full mx-auto border-2 
                  border-green-400 cursor-pointer hover:brightness-75 transition duration-300 ease-in-out"
                   src={userData.photoURL || assets.profile2}
                   alt="Profile"
@@ -307,9 +307,9 @@ function Profile() {
 
                 {userData.photoURL && (
                   <button
-                    className="absolute top-2 right-20 bg-black text-white text-xs 
-                    rounded-full w-[30px] h-[30px] flex items-center justify-center
-                    opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out"
+                    className=" bg-black text-white text-xs
+                    rounded-full w-[30px] h-[30px] 
+                    sm:hidden group-hover:block absolute"
                     onClick={handleImageDelete}
                   >
                     ╳
