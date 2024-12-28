@@ -48,28 +48,48 @@ const listProducts = async (req,res)=>{
     try {
         const products = await productModel.find({});
         const printrove_response = await axios.get('https://api.printrove.com/api/external/products',{headers:{ 'Authorization': `Bearer ${process.env.PRINTROVE_AUTH_TOKEN}`}})
+      //only getting page 1 
+        const detailedProducts = await Promise.all(
+            printrove_response.data.products.map(async (product) => {
+              const productId = product.id.toString();
+              // Fetch variants for the current product
+              const variantResponse = await axios.get(
+                `https://api.printrove.com/api/external/products/${productId}`,
+                {
+                  headers: { Authorization: `Bearer ${process.env.PRINTROVE_AUTH_TOKEN}` },
+                }
+              );
+              const variants = variantResponse.data.product.variants.reduce((acc, variant) => {
+                acc[variant.product.size] = variant.id;
+                return acc;
+              }, {});
+              // Determine category and subcategory
+              const category = product.name.includes("Men") ? "Men" :
+                product.name.includes("Women") ? "Women" :
+                product.name.includes("Kids") ? "Kids" : "None";
       
-        const mergedProducts = [...products, ...printrove_response.data.products.map(product => {
+              const subCategory = product.name.includes("T-Shirt") ? "Topwear" :
+                product.name.includes("Lower") ? "Bottomwear" :
+                product.name.includes("Winter") ? "Winterwear" : "None";
+      
+              // Return formatted product
+              return {
+                _id: product.id.toString(),
+                bestseller: true,
+                category: category,
+                description: `This is a ${product.product.name} with a cool theme "${product.name}"`,
+                image: [product.mockup.front_mockup, product.mockup.back_mockup],
+                name: product.name,
+                price: 349, // Default price
+                sizes: Object.keys(variants),
+                subCategory: subCategory,
+                printrove: true,
+                variants: variants,
+              };
+            })
+          );
 
-            let category = product.name.includes("Men") ? "Men" :
-                 product.name.includes("Women") ? "Women" :
-                 product.name.includes("Kids") ? "Kids" : "None";
-            let subCategory = product.name.includes("T-Shirt") ? "Topwear" :
-                 product.name.includes("Lower") ? "Bottomwear" :
-                 product.name.includes("Winter") ? "Winterwear" : "None";
-
-           return{ _id: product.id.toString(),
-            bestseller: true,  
-            category: category,
-            description: `This is a ${product.product.name} with a cool theme "${product.name}"`,
-            image: [product.mockup.front_mockup, product.mockup.back_mockup],
-            name: product.name,
-            price: 349,  
-            sizes: ["M", "L", "XL"],
-            subCategory: subCategory,
-            printrove:true,
-          }})]; 
-
+        const mergedProducts = [...products, ...detailedProducts]; 
         res.json({success:true, mergedProducts});
     } catch (error) {
         console.log(error);

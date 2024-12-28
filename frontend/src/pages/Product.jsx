@@ -12,8 +12,6 @@ const Product = () => {
   const [size, setSize] = useState('');
 
   const fetchProductData = async()=>{
-    // console.log(products);
-    
    products.map((item)=>{
       if(item._id===productId){
         setProductData(item);
@@ -25,7 +23,7 @@ const Product = () => {
 
   useEffect(() => {
     fetchProductData();
-  }, [productId,products])
+  }, [productId,products,size])
   
   return productData? (
     <div className='border-t-2 pt-10 transition-opacity ease-in duration-500 opacity-100'>
