@@ -26,10 +26,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 const placeOrder = async (req,res) => {
     
     try { 
-        const {userId,items,amount,address} = req.body;
+        const {userId,items,printroveItems, amount,address} = req.body;
         const orderData = {
             userId,
             items,
+            printroveItems,
             address,
             amount,
             paymentMethod:"COD",
@@ -37,10 +38,41 @@ const placeOrder = async (req,res) => {
             date:Date.now()
         }
         const newOrder = new orderModel(orderData);
+        //PRINTROVE ORDER
+        if(printroveItems.length > 0){
+            const order_products = printroveItems.map((item)=>({
+                quantity:item.quantity,
+                variant_id:item.variantID
+            }))
+            const printroveOrderData = {
+                "reference_number": newOrder._id.toString(),
+                "retail_price": amount,
+                "customer":address,
+                order_products,
+                "cod":true
+            }
+            try {
+                const printrove_response = await axios.post(
+                    'https://api.printrove.com/api/external/orders',
+                    printroveOrderData,
+                    {headers:{ 'Authorization': `Bearer ${process.env.PRINTROVE_AUTH_TOKEN}`}})
+                    // console.log(printrove_response.status);
+                    // res.json({success:true,message:printrove_response.data})
+            } catch (error) {
+                if (error.response) {
+                    return res.json({success:false, message:error.response.data.message})
+                } else if (error.request) {
+                    console.error("No response received:", error.request);
+                } else {
+                    console.error("General Error:", error.message);
+                }
+                res.json({success:false, message:error.message})
+            }          
+        }else{
         await newOrder.save()
-
         await userModel.findByIdAndUpdate(userId,{cartData:{}});
         res.json({success:true, message:"Order Placed"})
+        }
     } catch (error) {
         console.log(error);
         res.json({success:false, message:error.message});
@@ -82,9 +114,9 @@ const placeOrderCashfree = async (req,res) =>{
             order_id:savedOrder._id,
             customer_details: {
               customer_id: userId,
-              customer_name: address.firstName+" "+address.lastName,
+              customer_name: address.name,
               customer_email: address.email,
-              customer_phone:  address.phone,
+              customer_phone:  address.number,
             },
             order_meta: {
               return_url: 'https://www.yourwebsite.com/payment-response',

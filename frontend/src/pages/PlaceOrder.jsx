@@ -20,15 +20,14 @@ const PlaceOrder = () => {
   const [method,setMethod] = useState('cod');
   const{navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products} = useContext(ShopContext);
   const [formData, setFormData] = useState({
-    firstName:'',
-    lastName:'',
+    name:'',
     email:'',
-    street:'',
+    number:'',
+    address1:'',
+    pincode:'',
     city:'',
     state:'',
-    zipcode:'',
-    country:'',
-    phone:''
+    country:''
   })
 
   const onChangeHandler = (event) => {
@@ -69,22 +68,33 @@ const PlaceOrder = () => {
     event.preventDefault()
     try {
       let orderItems = []
+      let printroveItems = [];
+
       for (const items in cartItems) {
-         for (const item in cartItems[items]) {
-             if(cartItems[items][item] > 0){
-                const itemInfo = structuredClone(products.find(product => product._id===items));
-                if (itemInfo) {
-                  itemInfo.size=item;
-                  itemInfo.quantity=cartItems[items][item];
-                  orderItems.push(itemInfo)
-                }
-             }
-         }
+        for (const item in cartItems[items]) {
+          if (cartItems[items][item] > 0) {
+            const itemInfo = structuredClone(
+              products.find((product) => product._id === items)
+            );
+            if (itemInfo) {
+              itemInfo.size = item;
+              itemInfo.quantity = cartItems[items][item];
+
+              if (itemInfo.printrove) {
+                itemInfo.variantID = itemInfo.variants[item]; // Dynamically assign variantId
+                printroveItems.push(itemInfo); // Add to printroveItems array
+              } else {
+                orderItems.push(itemInfo); // Add to orderItems array
+              }
+            }
+          }
+        }
       }
 
       let orderData = {
         address: formData,
         items:orderItems,
+        printroveItems:printroveItems,
         amount:getCartAmount()+delivery_fee,
       }
       const handleCashfree = async () => {   
@@ -92,7 +102,7 @@ const PlaceOrder = () => {
           // Initiating payment request
           const { data } = await axios.post(backendUrl+"/api/order/cashfree", orderData, {
             headers: { token },
-          });
+          });          
       
           if (!data || !data.paymentId || !data.orderId) {
             throw new Error("Invalid payment data received from the server.");
@@ -108,7 +118,7 @@ const PlaceOrder = () => {
           };
       
           // Start Cashfree checkout process
-          cashfree.checkout(checkoutOptions).then((result) => {
+          cashfree.checkout(checkoutOptions).then((result) => {            
             if (result.error) {
               console.error("Cashfree Checkout Error:", result.error.message);
               alert(`Payment Error: ${result.error.message}`);
@@ -180,23 +190,22 @@ const PlaceOrder = () => {
 
         </div>
         <div className='flex gap-3'>
-          <input required onChange={onChangeHandler} name='firstName' value={formData.firstName} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='First Name' />
-          <input required onChange={onChangeHandler} name='lastName' value={formData.lastName} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Last Name' />
+          <input required onChange={onChangeHandler} name='name' value={formData.name} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Name' />
         </div>
         <input required onChange={onChangeHandler} name='email' value={formData.email} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="email" placeholder='Email Address' />
-        <input required onChange={onChangeHandler} name='street' value={formData.street} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Street' />
-        {/* <input required onChange={onChangeHandler} name='firstName' value={formData.firstName} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='First Name' /> */}
+        <input required onChange={onChangeHandler} name='address1' value={formData.address1} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Address' />
+        {/* <input required onChange={onChangeHandler} name='name' value={formData.name} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='First Name' /> */}
         <div className='flex gap-3'>
           <input required onChange={onChangeHandler} name='city' value={formData.city} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='City' />
           <input required onChange={onChangeHandler} name='state' value={formData.state} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='State' />
         </div>
 
         <div className='flex gap-3'>
-          <input required onChange={onChangeHandler} name='zipcode' value={formData.zipcode} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='Zipcode' />
+          <input required onChange={onChangeHandler} name='pincode' value={formData.pincode} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='pincode' />
           <input required onChange={onChangeHandler} name='country' value={formData.country} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Country' />
         </div>
 
-        <input required onChange={onChangeHandler} name='phone' value={formData.phone} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='Phone' />
+        <input required onChange={onChangeHandler} name='number' value={formData.number} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='Phone' />
 
 
       </div>
