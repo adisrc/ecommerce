@@ -17,11 +17,8 @@ connectCloudinary();
 
 //Middlewares 
 app.use(express.json());
-app.use(cors({
-    origin: "https://adityatrend.vercel.app", // Allow requests from your frontend domain
-    methods: "GET,POST,PUT,DELETE",          // Allow specific HTTP methods
-    credentials: true,                      // Enable credentials (if needed)
-  }))
+app.use(cors());
+
 //API endpoints
 app.use('/api/user',userRouter);
 app.use('/api/product',productRouter);
