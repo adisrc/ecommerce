@@ -18,12 +18,14 @@ import Verify from './pages/Verify';
 import Terms from './pages/Terms';
 import Refund from './pages/Refund';
 import Profile from './pages/Profile';
+import ScrollToTop from './components/ScrollToTop';
 const App = () => {
   return (
     <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
       <ToastContainer/>
       <Navbar/>
       <SearchBar/>
+      <ScrollToTop/>
       <Routes>
         <Route path='/' element={<Home/>}/>
         <Route path='/collection' element={<Collection/>}/>
