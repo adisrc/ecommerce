@@ -4,6 +4,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import Title from "../components/Title";
 import { assets } from "../assets/assets";
+import { Box, Skeleton } from "@mui/material";
 
 function Profile() {
   const {
@@ -12,7 +13,7 @@ function Profile() {
     userData,
     setUserData,
   } = useContext(ShopContext);
-
+  const [photoLoading, setPhotoLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -90,6 +91,7 @@ function Profile() {
 
   const handleImageUpload = async (todo) => {
     try { 
+      setPhotoLoading(true);
       const formData = new FormData();
       formData.append('image', profilePhoto); 
       const response = await axios.post(backendUrl+"/api/user/upload-photo",formData,{headers:{token}});
@@ -100,13 +102,16 @@ function Profile() {
         }));
         toast.success("Profile Photo Updated!")
       }
+      setPhotoLoading(false)
     } catch (error) {
+      setPhotoLoading(false)
       console.log(error);
       toast.error(error.message)
     }
   }
   const handleImageDelete = async () => {
     try {
+      setPhotoLoading(true);
       const image = userData.photoURL;
       const response = await axios.post(backendUrl+"/api/user/delete-photo",{image},{headers:{token}});
       if(response.data.success){ 
@@ -116,7 +121,9 @@ function Profile() {
         }));
         toast.success("Profile Photo Deleted!")
       } 
+      setPhotoLoading(false)
     } catch (error) {
+      setPhotoLoading(false)
       console.log(error.message);
       toast.error(error.message)
     }
@@ -296,14 +303,24 @@ function Profile() {
                 accept="image/*"
               />
 
-              <div className="group flex w-[130px] mx-auto mt-4">
-                <img
+              <div className="group  w-[130px] mx-auto mt-4">
+                {
+                  photoLoading?   <Box
+                  sx={{
+                    width: 100,
+                    height: 100,
+                    margin: '0 auto',  
+                  }}
+                >
+                  <Skeleton animation="wave" variant="circular" width={100} height={100} />
+                </Box>
+                  :<img
                   onClick={() => {fileRef.current.click()}}
                   className="w-[100px] h-[100px] object-cover rounded-full mx-auto border-2 
                  border-green-400 cursor-pointer hover:brightness-75 transition duration-300 ease-in-out"
                   src={userData.photoURL || assets.profile2}
                   alt="Profile"
-                />
+                />}
 
                 {userData.photoURL && (
                   <button

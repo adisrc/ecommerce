@@ -7,8 +7,11 @@ import { ShopContext } from '../context/ShopContext'
 import { toast } from 'react-toastify'
 import axios from 'axios' 
 import {load} from '@cashfreepayments/cashfree-js';
+import CircularProgress from '@mui/material/CircularProgress'
+import { Button } from '@mui/material'
 
 const PlaceOrder = () => {
+  const [loading, setLoading] = useState(false);
   let cashfree;
   let initializeSDK = async function () {
     cashfree = await load({
@@ -67,6 +70,7 @@ const PlaceOrder = () => {
   const onSubmitHandler = async (event) => {
     event.preventDefault()
     try {
+      setLoading(true);
       let orderItems = []
       let printroveItems = [];
 
@@ -175,6 +179,7 @@ const PlaceOrder = () => {
           default:
             break;
       }
+      setLoading(false);
     } 
     catch (error) {
       console.log(error);
@@ -251,9 +256,17 @@ const PlaceOrder = () => {
             </div>
 
           </div>
-          <div className='w-full text-end mt-8'>
-            <button type='submit' className='bg-black text-white px-16 py-3 text-sm'>
-              PLACE ORDER </button>
+          <div className='w-full flex sm:justify-end justify-center mt-8'>
+            {/* <button type='submit' className='bg-black text-white px-16 py-3 text-sm'>
+            <CircularProgress />
+            PLACE ORDER
+             </button> */}
+             <Button  sx={{
+          width: '200px', 
+          height: '56px', 
+          display: 'flex', 
+          justifyContent: 'center',  
+        }} type='submit' variant='contained' disabled={loading} size='large'>{loading?<CircularProgress color='inherit'/>:"PLACE ORDER"}</Button>
 
           </div>
 
