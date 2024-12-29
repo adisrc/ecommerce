@@ -19,6 +19,46 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 // })
 
 
+const handlePrintroveOrder = async (printroveItems,address,newOrder,cod) => {
+    const totalAmount = printroveItems.reduce( (total, item) => total + item.quantity * item.price,0);        
+        const order_products = printroveItems.map((item)=>({
+        quantity:item.quantity,
+        variant_id:item.variantID
+    }))
+
+    const printroveOrderData = {
+        "reference_number": "OD293847",
+        "retail_price": totalAmount,
+        "customer":address,
+        order_products,
+        "cod":cod
+    }
+    
+    try {
+        const printrove_response = await axios.post(
+            'https://api.printrove.com/api/external/orders',
+            printroveOrderData,
+            {headers:{ 'Authorization': `Bearer ${process.env.PRINTROVE_AUTH_TOKEN}`}})
+            // console.log(printrove_response.status);
+            // await newOrder.save()
+            // await userModel.findByIdAndUpdate(userId,{cartData:{}});
+            return({success:true, message:"Order Placed"})
+    } catch (error) {
+        if (error.response) {
+            console.log("Error:",error.response.data);
+            return {
+                success: false,
+                message: error.response.data.message,
+                error:error.response.data.errors
+              };
+        } else if (error.request) {
+            console.error("No response received:", error.request);
+            return;
+        }
+        console.log(error.message);
+        return ({success:false, message:error.message})
+    }          
+}
 
 //Placing orders using cod method  
 
@@ -37,46 +77,21 @@ const placeOrder = async (req,res) => {
             payment:false,
             date:Date.now()
         }
-        const newOrder = new orderModel(orderData);
         //PRINTROVE ORDER
+        const newOrder = new orderModel(orderData);
+
         if(printroveItems.length > 0){
-            const order_products = printroveItems.map((item)=>({
-                quantity:item.quantity,
-                variant_id:item.variantID
-            }))
-            const printroveOrderData = {
-                "reference_number": newOrder._id.toString(),
-                "retail_price": amount,
-                "customer":address,
-                order_products,
-                "cod":true
-            }
-            try {
-                const printrove_response = await axios.post(
-                    'https://api.printrove.com/api/external/orders',
-                    printroveOrderData,
-                    {headers:{ 'Authorization': `Bearer ${process.env.PRINTROVE_AUTH_TOKEN}`}})
-                    // console.log(printrove_response.status);
-                    // res.json({success:true,message:printrove_response.data})
-            } catch (error) {
-                if (error.response) {
-                    return res.json({success:false, message:error.response.data.message})
-                } else if (error.request) {
-                    console.error("No response received:", error.request);
-                } else {
-                    console.error("General Error:", error.message);
-                }
-                res.json({success:false, message:error.message})
-            }          
-        }else{
+            const response =await handlePrintroveOrder(printroveItems,address,newOrder,true);
+            if(!response.success)
+            return res.json(response);        
+        }
         await newOrder.save()
         await userModel.findByIdAndUpdate(userId,{cartData:{}});
         res.json({success:true, message:"Order Placed"})
-        }
+        
     } catch (error) {
         console.log(error);
         res.json({success:false, message:error.message});
-        
     }
 }
 
