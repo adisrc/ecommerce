@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '../context/ShopContext'
 import Title from './Title';
 import ProductItem from './ProductItem';
+import { LinearProgress } from '@mui/material';
 
 const LatestCollection = () => {
     
@@ -12,7 +13,7 @@ const LatestCollection = () => {
           setLatestProducts(products.slice(0,10));
     },[products])
 
-  return (
+  return products.length>0?(
     <div className='my-10'>
         <div className='text-center py-8 text-3xl'>
             <Title text1={'LATEST'} text2={'COLLECTION'}/>
@@ -30,7 +31,7 @@ const LatestCollection = () => {
 </div>
        
     </div>
-  )
+  ):<LinearProgress/>
 }
 
 export default LatestCollection

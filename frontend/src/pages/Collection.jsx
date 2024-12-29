@@ -3,6 +3,7 @@ import { ShopContext } from '../context/ShopContext'
 import { assets } from '../assets/assets';
 import Title from'../components/Title';
 import ProductItem from '../components/ProductItem';
+import { Skeleton } from '@mui/material';
 const Collection = () => {
     const {products,search, showSearch} = useContext(ShopContext);
     const [showFilter, setShowFilter] = useState(false);
@@ -133,14 +134,30 @@ useEffect(()=>{
         </div>
 
         {/* Map Products */}
-        <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6'>
+       {products.length>0 ?<div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6'>
 
             {
               filterProducts.map((item,index)=>(
                 <ProductItem key={index} id={item._id} image={item.image} name={item.name} price={item.price}/>
               ))
             }
+        </div>: 
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6">
+      {/* Skeleton for 4 cards */}
+      {Array.from({ length: 8 }).map((_, index) => (
+        <div key={index} className="mb-6">
+          <div className="overflow-hidden relative">
+            <Skeleton variant="rectangular" width={200} height={250} />
+          </div>
+          <p className="pt-3 pb-1 text-sm">
+            <Skeleton variant="text" width="80%" />
+          </p>
+          <p className="text-sm font-medium">
+            <Skeleton variant="text" width="40%" />
+          </p>
         </div>
+      ))}
+    </div>}
 
       </div>
 
