@@ -31,7 +31,7 @@ const LatestCollection = () => {
 </div>
        
     </div>
-  ):<LinearProgress/>
+  ):<div><br/><br/><br/><LinearProgress/></div>
 }
 
 export default LatestCollection
