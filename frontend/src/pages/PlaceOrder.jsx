@@ -1,17 +1,28 @@
 import React, { useContext } from 'react'
 import Title from '../components/Title'
 import CartTotal from '../components/CartTotal'
-import { assets } from '../assets/assets'
 import { useState } from 'react'
 import { ShopContext } from '../context/ShopContext'
 import { toast } from 'react-toastify'
 import axios from 'axios' 
 import {load} from '@cashfreepayments/cashfree-js';
 import CircularProgress from '@mui/material/CircularProgress'
-import { Button } from '@mui/material'
+import { Button, FormControlLabel, Switch } from '@mui/material'
 
 const PlaceOrder = () => {
   const [loading, setLoading] = useState(false);
+  const [checked, setChecked] = useState(false);
+  const [method,setMethod] = useState('cashfree');
+  const{navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products} = useContext(ShopContext);
+
+  const handleChange = (event)=>{
+    setChecked(event.target.checked);
+       if(event.target.checked){
+        setMethod('cod');
+       }else{
+        setMethod('cashfree')
+       }
+  }
   let cashfree;
   let initializeSDK = async function () {
     cashfree = await load({
@@ -20,8 +31,6 @@ const PlaceOrder = () => {
   }
   initializeSDK();
   const returnURL = import.meta.env.VITE_CASHFREE_MODE==="sandbox"?"http://localhost:5173":"https://adityatrend.vercel.app";
-  const [method,setMethod] = useState('cod');
-  const{navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products} = useContext(ShopContext);
   const [formData, setFormData] = useState({
     name:'',
     email:'',
@@ -38,33 +47,6 @@ const PlaceOrder = () => {
     const value = event.target.value;
 
     setFormData(data => ({...data,[name]:value}))
-  }
-
-  const initPay = (order)=>{
-     const options ={
-      key:import.meta.enc.VITE_RAZORPAY_KEY_ID,
-      amount : order.amount,
-      currency:order.currency,
-      name:'Order Payment',
-      order_id:order.id,
-      receipt:order.receipt,
-      handler: async (response) => {
-        console.log(response); 
-        try {
-          const {data} = await axios.post(backendUrl+'/api/order/verifyRazorpay',response,{headers:{token}})
-          if(data.success){
-            navigate('/orders')
-            setCartItems({})
-          }
-        } catch (error) {
-          console.log(error);
-          toast.error(error.message)
-          
-        }
-      }
-     }
-     const rzp = new window.Razorpay(options);
-     rzp.open()
   }
 
   const onSubmitHandler = async (event) => {
@@ -103,7 +85,6 @@ const PlaceOrder = () => {
       }
       const handleCashfree = async () => {   
         try { 
-          // Initiating payment request
           const { data } = await axios.post(backendUrl+"/api/order/cashfree", orderData, {
             headers: { token },
           });          
@@ -117,20 +98,32 @@ const PlaceOrder = () => {
           // Prepare Cashfree checkout options
           const checkoutOptions = {
             paymentSessionId: paymentId,
-            redirectTarget: '_self', // Correct typo
+            redirectTarget: '_modal', // Correct typo
             returnUrl: returnURL+"/verify?order_id={order_id}&method=cashfree",
           };
       
           // Start Cashfree checkout process
-          cashfree.checkout(checkoutOptions).then((result) => {            
+          cashfree.checkout(checkoutOptions).then(async(result) => {            
             if (result.error) {
               console.error("Cashfree Checkout Error:", result.error.message);
-              alert(`Payment Error: ${result.error.message}`);
+              const response = await axios.post(backendUrl + '/api/order/verifyCashfree',{ order_id:data.orderId });
+              toast.error(`Payment Error: ${result.error.message}`);
+              toast.error(response.data.message);
             } else if (result.redirect) {
               console.log("Redirection in process");
-
             } else {
               console.log("Payment Completed Successfully", result);
+          //Verify cashfree Payment
+            const response = await axios.post(backendUrl + '/api/order/verifyCashfree',{ order_id:data.orderId });
+            console.log(response.data);
+            if (response.data.success) {
+              toast.success(response.data.message);
+                setCartItems({})
+                navigate('/orders')
+            }else{
+              toast.error(response.data.message)
+                navigate('/cart')
+            }
             }
           });
         } catch (error) {
@@ -160,14 +153,7 @@ const PlaceOrder = () => {
               toast.error(responseStripe.data.message)
             }
           break;
-          case 'razorpay':
-            const responseRazorpay = await axios.post(backendUrl+'/api/order/razorpay',orderData,{headers:{token}})
-            if(responseRazorpay.data.success){
-              initPay(responseRazorpay.data.order)
-              
-            }
-            break;
-            case 'cashfree': 
+          case 'cashfree': 
             if(token)
              handleCashfree();
             else{
@@ -187,94 +173,148 @@ const PlaceOrder = () => {
   }
   
   return (
-    <form onSubmit={onSubmitHandler} className='flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t'>
+    <form
+      onSubmit={onSubmitHandler}
+      className="flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t"
+    >
       {/*-------------- Left Side ---------------*/}
-      <div className='flex flex-col gap-4 w-full sm:max-w-[480px]'>
-        <div className='text-xl sm:text-2xl my-3'>
-          <Title text1={'DELIVERY'} text2={'INFORMATION'} />
-
+      <div className="flex flex-col gap-4 w-full sm:max-w-[480px]">
+        <div className="text-xl sm:text-2xl my-3">
+          <Title text1={"DELIVERY"} text2={"INFORMATION"} />
         </div>
-        <div className='flex gap-3'>
-          <input required onChange={onChangeHandler} name='name' value={formData.name} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Name' />
+        <div className="flex gap-3">
+          <input
+            required
+            onChange={onChangeHandler}
+            name="name"
+            value={formData.name}
+            className="border border-grey-300 rounded py-1.5 px-3.5 w-full"
+            type="text"
+            placeholder="Name"
+          />
         </div>
-        <input required onChange={onChangeHandler} name='email' value={formData.email} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="email" placeholder='Email Address' />
-        <input required onChange={onChangeHandler} name='address1' value={formData.address1} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Address' />
+        <input
+          required
+          onChange={onChangeHandler}
+          name="email"
+          value={formData.email}
+          className="border border-grey-300 rounded py-1.5 px-3.5 w-full"
+          type="email"
+          placeholder="Email Address"
+        />
+        <input
+          required
+          onChange={onChangeHandler}
+          name="address1"
+          value={formData.address1}
+          className="border border-grey-300 rounded py-1.5 px-3.5 w-full"
+          type="text"
+          placeholder="Address"
+        />
         {/* <input required onChange={onChangeHandler} name='name' value={formData.name} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='First Name' /> */}
-        <div className='flex gap-3'>
-          <input required onChange={onChangeHandler} name='city' value={formData.city} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='City' />
-          <input required onChange={onChangeHandler} name='state' value={formData.state} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='State' />
+        <div className="flex gap-3">
+          <input
+            required
+            onChange={onChangeHandler}
+            name="city"
+            value={formData.city}
+            className="border border-grey-300 rounded py-1.5 px-3.5 w-full"
+            type="text"
+            placeholder="City"
+          />
+          <input
+            required
+            onChange={onChangeHandler}
+            name="state"
+            value={formData.state}
+            className="border border-grey-300 rounded py-1.5 px-3.5 w-full"
+            type="text"
+            placeholder="State"
+          />
         </div>
 
-        <div className='flex gap-3'>
-          <input required onChange={onChangeHandler} name='pincode' value={formData.pincode} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='pincode' />
-          <input required onChange={onChangeHandler} name='country' value={formData.country} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Country' />
+        <div className="flex gap-3">
+          <input
+            required
+            onChange={onChangeHandler}
+            name="pincode"
+            value={formData.pincode}
+            className="border border-grey-300 rounded py-1.5 px-3.5 w-full"
+            type="number"
+            placeholder="Pincode"
+          />
+          <input
+            required
+            onChange={onChangeHandler}
+            name="country"
+            value={formData.country}
+            className="border border-grey-300 rounded py-1.5 px-3.5 w-full"
+            type="text"
+            placeholder="Country"
+          />
         </div>
 
-        <input required onChange={onChangeHandler} name='number' value={formData.number} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='Phone' />
-
-
+        <input
+          required
+          onChange={onChangeHandler}
+          name="number"
+          value={formData.number}
+          className="border border-grey-300 rounded py-1.5 px-3.5 w-full"
+          type="number"
+          placeholder="Phone"
+        />
       </div>
 
       {/* --------Right Side ---------------- */}
 
       <div className="mt-8">
         <div className="mt-8 min-w-80">
-           <CartTotal/>
+          <CartTotal />
         </div>
 
-        <div className='mt-12'>
-          <Title text1={'PAYMENT'} text2={'METHOD'}/>
+        <div className="mt-12">
           {/* -------------Payment Method Selection */}
-
-          <div className='flex gap-3 flex-col lg:flex-row'>
-            <div onClick={()=>setMethod('stripe')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
-              <p className={`min-w-3.5 h-3.5 border rounded-full ${method==='stripe'?'bg-green-400':''}`}>
-              </p>
-              <img className='h-5 mx-4' src={assets.stripe_logo} alt="" />
-
-            </div>
-            {/* <div onClick={()=>setMethod('razorpay')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'> 
-              <p className={`min-w-3.5 h-3.5 border rounded-full ${method==='razorpay'?'bg-green-400':''}`}>
-
-              </p>
-              <img className='h-5 mx-4' src={assets.razorpay_logo} alt="" />
-
-            </div>*/}
-            <div onClick={()=>setMethod('cashfree')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
-              <p className={`min-w-3.5 h-3.5 border rounded-full ${method==='cashfree'?'bg-green-400':''}`}>
-
-              </p>
-              <img className='h-7 mx-4' src={assets.cashfree_logo} alt="" />
-
-            </div>
-            <div onClick={()=>setMethod('cod')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
-              <p className={`min-w-3.5 h-3.5 border rounded-full ${method==='cod'?'bg-green-400':''}`}>
-
-              </p>
-              <p className='text-gray-500 text-sm font-medium mx-4'>CASH ON DELIVERY</p>
-
-            </div>
-
-          </div>
-          <div className='w-full flex sm:justify-end justify-center mt-8'>
-            {/* <button type='submit' className='bg-black text-white px-16 py-3 text-sm'>
-            <CircularProgress />
-            PLACE ORDER
-             </button> */}
-             <Button  sx={{
-          width: '200px', 
-          height: '56px', 
-          display: 'flex', 
-          justifyContent: 'center',  
-        }} type='submit' variant='contained' disabled={loading} size='large'>{loading?<CircularProgress color='inherit'/>:"PLACE ORDER"}</Button>
-
+          <div   className={`border-2 rounded-full flex justify-center items-center transition-colors duration-300 
+          ${checked ? 'border-green-500 bg-green-100' : 'border-black bg-white'}`}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={checked}
+                onChange={handleChange}
+                color="success" // Customize the switch color
+              />
+            }
+            label={ 
+                "Cash on Delivery"
+            }
+          />
           </div>
 
+          <div className="w-full flex sm:justify-end justify-center mt-8">
+            <Button
+              sx={{
+                width: "200px",
+                height: "56px",
+                display: "flex",
+                justifyContent: "center",
+                backgroundColor: "black", 
+                color: "white", 
+                "&:hover": {
+                  backgroundColor: "gray", 
+                },
+              }}
+              type="submit"
+              variant="contained"
+              disabled={loading}
+              size="large"
+            >
+              {loading ? <CircularProgress color="inherit" /> : "PLACE ORDER"}
+            </Button>
+          </div>
         </div>
-        
       </div>
     </form>
-  )
+  );
 }
 
 export default PlaceOrder

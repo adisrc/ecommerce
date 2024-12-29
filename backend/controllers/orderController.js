@@ -2,7 +2,6 @@ import orderModel from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
 import axios from 'axios';
 import Stripe from 'stripe'
-import razorpay from 'razorpay'
 import dotenv from 'dotenv';
 dotenv.config();  // Load .env file
 
@@ -13,13 +12,8 @@ const deliveryCharge = 10
 
 //initializing gateway
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
-// const razorpayInstance = new razorpay({
-//     key_id:process.env.RAZORPAY_KEY_ID,
-//     key_secret:process.env.RAZORPAY_KEY_SECRET,
-// })
 
-
-const handlePrintroveOrder = async (printroveItems,address,newOrder,cod) => {
+const handlePrintroveOrder = async (printroveItems,address,newOrder,method) => {
     const totalAmount = printroveItems.reduce( (total, item) => total + item.quantity * item.price,0);        
         const order_products = printroveItems.map((item)=>({
         quantity:item.quantity,
@@ -27,13 +21,12 @@ const handlePrintroveOrder = async (printroveItems,address,newOrder,cod) => {
     }))
 
     const printroveOrderData = {
-        "reference_number": "OD293847",
+        "reference_number": newOrder._id.toString(),
         "retail_price": totalAmount,
         "customer":address,
         order_products,
-        "cod":cod
+        "cod":method
     }
-    
     try {
         const printrove_response = await axios.post(
             'https://api.printrove.com/api/external/orders',
@@ -95,87 +88,6 @@ const placeOrder = async (req,res) => {
     }
 }
 
-
-//   --------CASHFREEEEEEEEE_____________________________*******
-
-const cashfreeUrl = process.env.CASHFREE_MODE=='production'?'https://api.cashfree.com':'https://sandbox.cashfree.com';
-const headers = {
-    'x-client-id': process.env.CASHFREE_MODE=='production'?process.env.CASHFREE_CLIENT_ID:process.env.CASHFREE_CLIENT_ID_TEST,
-    'x-client-secret': process.env.CASHFREE_MODE=='production'?process.env.CASHFREE_SECRET_KEY:process.env.CASHFREE_SECRET_KEY_TEST,
-    'x-api-version': '2023-08-01',
-    'Content-Type': 'application/json',
-    'Accept':'application/json'
-  };
-
-const placeOrderCashfree = async (req,res) =>{
-
-    const {address,items,amount,userId} = req.body;  
-    try {
-        const orderData = {
-            userId,
-            items,
-            address,
-            amount,
-            paymentMethod:"Cashfree",
-            payment:false,
-            date:Date.now()
-        }
-        const newOrder = new orderModel(orderData);
-        const savedOrder = await newOrder.save()
-      
-          const data = { 
-            order_amount: amount,
-            order_currency: currency.toUpperCase(),
-            order_id:savedOrder._id,
-            customer_details: {
-              customer_id: userId,
-              customer_name: address.name,
-              customer_email: address.email,
-              customer_phone:  address.number,
-            },
-            order_meta: {
-              return_url: 'https://www.yourwebsite.com/payment-response',
-            },
-          };
-            const response = await axios.post(cashfreeUrl+'/pg/orders', data, { headers }); 
-            
-            
-            res.json({success:true, message:"Order Created",orderId:savedOrder._id, paymentId:response.data.payment_session_id })
-         
-    } catch (error) {
-        console.log(error.message);
-        res.json({success:false, message:error.message});
-    }
-}
-
-const verifyCashfree = async (req,res)=>{
-
-    const { order_id } = req.body;
-    try {  
-        
-             try {
-                const response = await axios.get(cashfreeUrl+`/pg/orders/${order_id}`, { headers }); 
-                if (response.data.order_status==="PAID") {            
-                   const updatedOrder = await orderModel.findByIdAndUpdate(order_id, {payment:true});
-                   const userId = updatedOrder.userId;
-                   await userModel.findByIdAndUpdate(userId,{cartData:{}})
-                    res.json({success:true})
-                }else{
-                    
-                    await orderModel.findByIdAndDelete(order_id)
-                    res.json({success:false})
-                }
-            } catch (error) {
-                console.log(error.message);
-                res.json({success:false, message:error.message});
-            }
-         
-    } catch (error) {
-        console.log(error.message);
-        res.json({success:false, message:error.message});
-    }
-    
-}
 
 //Placing orders using stripe
 
@@ -251,62 +163,6 @@ const verifyStripe = async (req,res) => {
     }
 }
 
-//Placing orders using RazorPay
-
-const placeOrderRazorpay = async (req,res) => {
-
-    try {
-        const {userId,items,amount,address} = req.body;
-            const orderData = {
-                userId,
-                items,
-                address,
-                amount,
-                paymentMethod:"Razorpay",
-                payment:false,
-                date:Date.now()
-            }
-            const newOrder = new orderModel(orderData);
-            await newOrder.save()
-
-            const options = {
-                amount:amount*100,
-                currency:currency.toUpperCase(),
-                receipt:newOrder._id.toString()
-            }
-
-            await razorpayInstance.orders.create(options,(error,order)=>{
-                   if(error){
-                    console.log(error);
-                    return res.json({success:false, message:error})
-                   }
-                   res.json({success:true,order})
-            })
-    } catch (error) {
-        console.log(error);
-        res.json({success:false, message:error.message});
-    }
-    
-}
-
-const verifyRazorpay = async (req,res) => {
-    try {
-        const {userId, razorpay_order_id } = req.body
-        const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id);
-       if (orderInfo.status==='paid') {
-        await orderModel.findByIdAndUpdate(orderInfo.receipt,{payment:true});
-        await userModel.findByIdAndUpdate(userId, {cartData:{}})
-        res.json({success:true, message:"Payment Successful"})
-       }else{
-        res.json({success:false, message:'Payment Failed'})
-       }
-        
-    } catch (error) {
-        console.log(error);
-        res.json({success:false, message:error.message});
-    }
-}
-
 //All Orders data for admin panel
 
 const allOrders = async (req,res) => {
@@ -346,4 +202,4 @@ const updateStatus = async (req,res) => {
     }
 }
 
-export {placeOrder,placeOrderCashfree,placeOrderStripe,placeOrderRazorpay,allOrders,userOrders,updateStatus,verifyStripe,verifyRazorpay,verifyCashfree}
+export {placeOrder,placeOrderStripe,allOrders,userOrders,updateStatus,verifyStripe}

@@ -57,7 +57,6 @@ import p_img52 from './p_img52.png'
 
 import logo from './logo.png'
 import google from './google.png'
-import cashfree_logo from './cashfree_logo.png'
 import hero_img from './hero_img.png'
 import hero_img3 from './hero_img3.png'
 import cart_icon from './cart_icon.png'
@@ -85,7 +84,6 @@ export const assets = {
     profile2,
     showpass,hidepass,
     google,
-    cashfree_logo,
     logo,
     hero_img,
     hero_img3,
