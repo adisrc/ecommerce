@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext';
 import { assets } from '../assets/assets';
 import RelatedProducts from '../components/RelatedProducts';
+import { LinearProgress } from '@mui/material';
 
 const Product = () => {
   const {productId} = useParams();
@@ -118,7 +119,7 @@ const Product = () => {
 
 
     </div>
-  ): <div className='opacity-0'></div>
+  ): <LinearProgress color='inherit'/>
 }
 
 export default Product

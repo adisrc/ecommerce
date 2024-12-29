@@ -4,7 +4,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import Title from "../components/Title";
 import { assets } from "../assets/assets";
-import { Box, Skeleton } from "@mui/material";
+import { Avatar, Box, Skeleton } from "@mui/material";
 
 function Profile() {
   const {
@@ -12,6 +12,7 @@ function Profile() {
     token,
     userData,
     setUserData,
+    navigate
   } = useContext(ShopContext);
   const [photoLoading, setPhotoLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -88,6 +89,16 @@ function Profile() {
     if(profilePhoto){ 
       handleImageUpload(); }
   }, [profilePhoto])
+
+  useEffect(() => {
+    if (!userData) {
+      toast.warn("Please login to access the profile page.");
+      navigate("/login");
+    }
+  }, [userData, navigate]);
+
+  if (!userData) return null;
+
 
   const handleImageUpload = async (todo) => {
     try { 
@@ -277,8 +288,7 @@ function Profile() {
 
   return (
     <div>
-      {userData ? (
-        <>
+      <>
           <Title text1="PROFILE" text2="PAGE" />
           <h1 className="text-sm">User ID: {userData._id}</h1>
           <br />
@@ -303,30 +313,53 @@ function Profile() {
                 accept="image/*"
               />
 
-              <div className="group  w-[130px] mx-auto mt-4">
+              <div className="group  w-[130px] mx-auto mt-4 flex items-center flex-col">
                 {
-                  photoLoading?   <Box
-                  sx={{
-                    width: 100,
-                    height: 100,
-                    margin: '0 auto',  
-                  }}
-                >
-                  <Skeleton animation="wave" variant="circular" width={100} height={100} />
-                </Box>
-                  :<img
-                  onClick={() => {fileRef.current.click()}}
-                  className="w-[100px] h-[100px] object-cover rounded-full mx-auto border-2 
-                 border-green-400 cursor-pointer hover:brightness-75 transition duration-300 ease-in-out"
-                  src={userData.photoURL || assets.profile2}
-                  alt="Profile"
-                />}
+                    <Box
+                      sx={{
+                        width: 100,
+                        height: 100,
+                        cursor: "pointer",
+                        margin: "0 auto",
+                        transition:
+                          "transform 0.3s ease-in-out, brightness 0.3s ease-in-out",
+                        "&:hover": {
+                          transform: "scale(1.1)",  
+                          filter: "brightness(0.8)",  
+                        },
+                      }}
+                      onClick={() => {
+                        fileRef.current.click(); // Add your click logic here
+                      }}
+                    >
+                      {photoLoading?<Skeleton variant="circular">
+                        <Avatar
+                        sx={{
+                          width: 100,
+                          height: 100,
+                           border: '2px solid lightgreen'
+                        }}
+                        alt="Profile"
+                        src={userData.photoURL || assets.profile2}
+                      />
+                      </Skeleton>:
+                      <Avatar
+                        sx={{
+                          width: 100,
+                          height: 100,
+                           border: '2px solid lightgreen'
+                        }}
+                        alt="Profile"
+                        src={userData.photoURL || assets.profile2}
+                      />}
+                    </Box>
+                }
 
                 {userData.photoURL && (
                   <button
                     className=" bg-black text-white text-xs
                     rounded-full w-[30px] h-[30px] 
-                    sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute"
+                    sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 mt-1"
                     onClick={handleImageDelete}
                   >
                     ╳
@@ -381,9 +414,6 @@ function Profile() {
             </div>
           </div>
         </>
-      ) : (
-        <h1>Please Login</h1>
-      )}
     </div>
   );
 }
