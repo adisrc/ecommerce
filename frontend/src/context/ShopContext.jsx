@@ -18,8 +18,47 @@ const ShopContextProvider = (props)=>{
     const [token,setToken] = useState('');
     const [showGoToCart, setShowGoToCart] = useState(false);
     const [userData,  setUserData] = useState({});
+    //Addresses
+      const [showAddresses, setShowAddresses] = useState(false);
+      const [addressFormSubmitted, setAddressFormSubmitted] = useState(false);
+      const [open, setOpen] = useState(false);
+      const [addresses, setAddresses] = useState([]);
+      const [defaultAddress, setDefaultAddress]= useState({});
+      const [selectedAddress, setSelectedAddress] = useState({
+        name:'',
+        email:'',
+        number:'',
+        address1:'',
+        pincode:'',
+        city:'',
+        state:'',
+        country:'',
+        save:true,
+        default:true,
+        courier:{id:"001",name:"Default",cost:delivery_fee},
+      })
 
     const navigate= useNavigate();
+
+
+      const loadAddressData = async () => {
+        try {
+          const response = await axios.post(
+            `${backendUrl}/api/address/user-address`,
+            {},
+            { headers: { token } }
+          );
+          if (response.data.success) {
+            setAddresses(response.data.addresses);
+            setDefaultAddress(response.data.defaultAddress)
+          } else {
+            toast.error(response.data.message || 'Failed to fetch addresses.');
+          }
+        } catch (error) {
+          console.error('Error fetching addresses:', error);
+          toast.error('Failed to fetch addresses.');
+        }
+      };
 
 
     const addToCart= async (itemId,size)=>{
@@ -157,7 +196,9 @@ const ShopContextProvider = (props)=>{
       search, setSearch, showSearch, setShowSearch,
       cartItems,addToCart,getCartCount,updateQuantity,
       getCartAmount,navigate,backendUrl,printroveKey,
-      setToken,token,setCartItems,showGoToCart, setShowGoToCart
+      setToken,token,setCartItems,showGoToCart, setShowGoToCart,selectedAddress,setSelectedAddress,
+      showAddresses, setShowAddresses,addresses, setAddresses,defaultAddress,setDefaultAddress,loadAddressData,
+      open,setOpen,addressFormSubmitted, setAddressFormSubmitted
     }
 
     return (

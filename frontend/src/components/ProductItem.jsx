@@ -1,25 +1,35 @@
 import React, { useContext } from 'react'
 import { ShopContext } from '../context/ShopContext'
 import { Link } from 'react-router-dom';
+import { Card, CardContent, CardMedia, Typography } from '@mui/material';
 
 const ProductItem = ({id,image,name,price}) => {
-
-    const {currency} =  useContext(ShopContext);
+  const { currency } = useContext(ShopContext);
 
   return (
-<Link className='text-gray-700 cursor-pointer' to={`/product/${id}`}>
-  <div className='overflow-hidden relative'>
-    <img
-      className='w-full h-64 object-cover transform transition duration-300 ease-in-out hover:scale-110'
-      src={image[0]}
-      alt=""
-    />
-  </div>
-  <p className='pt-3 pb-1 text-sm'>{name}</p>
-  <p className='text-sm font-medium'>{currency} {price}</p>
-</Link>
+    <Link to={`/product/${id}`} className="no-underline text-inherit">
 
-  )
+<div className='transition-transform duration-200 ease-in-out hover:scale-105 transform'>
+<Card 
+      className="rounded-lg shadow-md overflow-hidden">
+        <CardMedia
+          component="img"
+          image={image[0]}
+          alt={name}
+          className="h-48 object-cover"
+        />
+        <CardContent className="p-4">
+          <Typography variant="subtitle1" className="font-medium mb-2 truncate">
+            {name}
+          </Typography>
+          <Typography variant="body2" className="text-gray-500">
+            {currency} {price}
+          </Typography>
+        </CardContent>
+      </Card>
+</div>
+    </Link>
+  );
 }
 
 export default ProductItem

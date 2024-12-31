@@ -4,7 +4,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import Title from "../components/Title";
 import { assets } from "../assets/assets";
-import { Avatar, Box, Skeleton } from "@mui/material";
+import { Avatar, Skeleton } from "@mui/material";
 
 function Profile() {
   const {
@@ -15,7 +15,7 @@ function Profile() {
     navigate
   } = useContext(ShopContext);
   const [photoLoading, setPhotoLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [selectedAddress, setSelectedAddress] = useState({
     name: "",
     email: "",
     phone: "",
@@ -33,7 +33,7 @@ function Profile() {
   // Update Profile API Call
   const updateProfile = async () => {
     try {
-      const { name,gender, email, phone } = formData;
+      const { name,gender, email, phone } = selectedAddress;
 
       // Check for unchanged fields
       if (name === userData.name && email === userData.email && phone === userData.phone && gender===userData.gender) {
@@ -103,9 +103,9 @@ function Profile() {
   const handleImageUpload = async (todo) => {
     try { 
       setPhotoLoading(true);
-      const formData = new FormData();
-      formData.append('image', profilePhoto); 
-      const response = await axios.post(backendUrl+"/api/user/upload-photo",formData,{headers:{token}});
+      const selectedAddress = new selectedAddress();
+      selectedAddress.append('image', profilePhoto); 
+      const response = await axios.post(backendUrl+"/api/user/upload-photo",selectedAddress,{headers:{token}});
       if(response.data.success){ 
         setUserData((prevData) => ({
           ...prevData, 
@@ -141,7 +141,7 @@ function Profile() {
   }
 
   const handleInputChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setSelectedAddress((prev) => ({ ...prev, [field]: value }));
   };
 
   const renderPersonalInfo = () => {
@@ -151,14 +151,14 @@ function Profile() {
         <>
           <div className="md:flex md:space-x-2">
             <input
-              value={formData.name}
+              value={selectedAddress.name}
               onChange={(e) => handleInputChange("name", e.target.value)}
               className="md:w-2/3 font-bold px-4 bg-white rounded-lg mt-2 text-gray-800 p-2"
               type="text"
               placeholder={userData.name || "Enter Your Name"}
             />
             <select
-              value={formData.gender}
+              value={selectedAddress.gender}
               onChange={(e) => handleInputChange("gender", e.target.value)}
               className="md:w-1/3 font-bold px-4 bg-white rounded-lg mt-2 text-gray-800 p-2"
             >
@@ -171,14 +171,14 @@ function Profile() {
             </select>
           </div>
           <input
-            value={formData.email}
+            value={selectedAddress.email}
             onChange={(e) => handleInputChange("email", e.target.value)}
             className="font-bold px-4 bg-white rounded-lg mt-2 text-gray-800 p-2"
             type="email"
             placeholder={userData.email || "username@example.com"}
           />
           <input
-            value={formData.phone}
+            value={selectedAddress.phone}
             onChange={(e) => {
               const value = e.target.value.replace(/\D/g, ""); // Restrict to digits only
               if (value.length <= 10) handleInputChange("phone", value);
@@ -264,7 +264,7 @@ function Profile() {
         <button
           className="bg-gray-800 h-10 rounded-lg w-1/2 text-white mt-4 mx-2"
           onClick={() => {
-            setFormData({
+            setSelectedAddress({
               name: userData.name,
               gender:userData.gender||"N/A",
               email: userData.email,
@@ -289,131 +289,124 @@ function Profile() {
   return (
     <div>
       <>
-          <Title text1="PROFILE" text2="PAGE" />
-          <h1 className="text-sm">User ID: {userData._id}</h1>
-          <br />
-          <button
-            onClick={() => setVisible(!visible)}
-            className="border-white border-2 bg-gray-400 rounded-r text-4xl w-8 text-center pb-1 absolute left-0 sm:hidden"
-          >
-            {" "}
-            ≡
-          </button>
-          <div className="flex">
-            <div
-              className={` absolute top-0 left-0 bottom-0 overflow-hidden bg-white sm:border-gray-300 border-2 transition-all 
+        <Title text1="PROFILE" text2="PAGE" />
+        <h1 className="text-sm">User ID: {userData._id}</h1>
+        <br />
+        <button
+          onClick={() => setVisible(!visible)}
+          className="border-white border-2 bg-gray-400 rounded-r text-4xl w-8 text-center pb-1 absolute left-0 sm:hidden"
+        >
+          {" "}
+          ≡
+        </button>
+        <div className="flex">
+          <div
+            className={` absolute top-0 left-0 bottom-0 overflow-hidden bg-white sm:border-gray-300 border-2 transition-all 
           ${visible ? "w-3/4" : "w-0"}
                sm:w-1/2 sm:relative sm:rounded-lg sm: mr-2`}
-            >
-              <input
-                onChange={(e) => setProfilePhoto(e.target.files[0])}
-                type="file"
-                ref={fileRef}
-                hidden
-                accept="image/*"
-              />
+          >
+            <input
+              onChange={(e) => setProfilePhoto(e.target.files[0])}
+              type="file"
+              ref={fileRef}
+              hidden
+              accept="image/*"
+            />
 
-              <div className="group  w-[130px] mx-auto mt-4 flex items-center flex-col">
-                {
-                    <Box
-                      sx={{
-                        width: 100,
-                        height: 100,
-                        cursor: "pointer",
-                        margin: "0 auto",
-                        transition:
-                          "transform 0.3s ease-in-out, brightness 0.3s ease-in-out",
-                        "&:hover": {
-                          transform: "scale(1.1)",  
-                          filter: "brightness(0.8)",  
-                        },
-                      }}
-                      onClick={() => {
-                        fileRef.current.click(); // Add your click logic here
-                      }}
-                    >
-                      {photoLoading?<Skeleton variant="circular">
-                        <Avatar
-                        sx={{
-                          width: 100,
-                          height: 100,
-                           border: '2px solid lightgreen'
-                        }}
-                        alt="Profile"
-                        src={userData.photoURL || assets.profile2}
-                      />
-                      </Skeleton>:
+            <div className="group mx-auto mt-4 flex items-center flex-col">
+              {
+                <div
+                  className="cursor-pointer h-20 transition-transform duration-300 ease-in-out hover:scale-105"
+                  onClick={() => fileRef.current.click()}
+                >
+                  {photoLoading ? (
+                    <Skeleton variant="circular">
                       <Avatar
                         sx={{
                           width: 100,
                           height: 100,
-                           border: '2px solid lightgreen'
+                          border: "2px solid lightgreen",
+                          transition:
+                            "transform 0.3s ease-in-out, filter 0.3s ease-in-out",
+                          "&:hover": {
+                            filter: "brightness(80%)",
+                          },
                         }}
                         alt="Profile"
                         src={userData.photoURL || assets.profile2}
-                      />}
-                    </Box>
-                }
+                      />
+                    </Skeleton>
+                  ) : (
+                    <Avatar
+                      sx={{
+                        width: 100,
+                        height: 100,
+                        border: "2px solid lightgreen",
+                      }}
+                      alt="Profile"
+                      src={userData.photoURL || assets.profile2}
+                    />
+                  )}
+                </div>
+              }
 
-                {userData.photoURL && (
-                  <button
-                    className=" bg-black text-white text-xs
-                    rounded-full w-[30px] h-[30px] 
+              {userData.photoURL && (
+                <button
+                  className=" bg-black text-white text-xs z-10
+                    rounded-full w-[30px] h-[30px] hover:bg-gray-600
                     sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200 mt-1"
-                    onClick={handleImageDelete}
-                  >
-                    ╳
-                  </button>
-                )}
-              </div>
-
-              <h1 className="text-center p-3 font-semibold">
-                Hi, {userData.name}
-              </h1>
-              <ul className="text-gray-600 bg-white border-gray-200">
-                <hr />
-                <li
-                  onClick={() => setTab("Personal Information")}
-                  className={`${
-                    tab === "Personal Information"
-                      ? "bg-gray-200 text-black"
-                      : ""
-                  } pl-3 hover:text-black cursor-pointer p-1`}
+                  onClick={handleImageDelete}
                 >
-                  Personal Information
-                </li>
-                <hr />
-                <li
-                  onClick={() => setTab("Manage Addresses")}
-                  className={`${
-                    tab === "Manage Addresses" ? "bg-gray-200 text-black" : ""
-                  } pl-3 hover:text-black cursor-pointer p-1`}
-                >
-                  {" "}
-                  Manage Addresses
-                </li>
-                <hr />
-                <li
-                  onClick={() => setTab("Your Reviews")}
-                  className={`${
-                    tab === "Your Reviews" ? "bg-gray-200 text-black" : ""
-                  } pl-3 hover:text-black cursor-pointer p-1`}
-                >
-                  Your Reviews
-                </li>
-                <hr />
-              </ul>
-            </div>
-            <div className="p-5 bg-gray-200 flex flex-col w-full rounded-lg my-auto">
-              <h1 className="text-sm">{tab}</h1>
-              {tab === "Personal Information" ? (
-                renderPersonalInfo()
-              ) : (
-                <div>Content for {tab}</div>
+                  ╳
+                </button>
               )}
             </div>
+
+            <h1 className="text-center p-3 font-semibold">
+              Hi, {userData.name}
+            </h1>
+            <ul className="text-gray-600 bg-white border-gray-200">
+              <hr />
+              <li
+                onClick={() => setTab("Personal Information")}
+                className={`${
+                  tab === "Personal Information" ? "bg-gray-200 text-black" : ""
+                } pl-3 hover:text-black cursor-pointer p-1`}
+              >
+                Personal Information
+              </li>
+              <hr />
+              <li
+                onClick={() => setTab("Manage Addresses")}
+                className={`${
+                  tab === "Manage Addresses" ? "bg-gray-200 text-black" : ""
+                } pl-3 hover:text-black cursor-pointer p-1`}
+              >
+                {" "}
+                Manage Addresses
+              </li>
+              <hr />
+              <li
+                onClick={() => setTab("Your Reviews")}
+                className={`${
+                  tab === "Your Reviews" ? "bg-gray-200 text-black" : ""
+                } pl-3 hover:text-black cursor-pointer p-1`}
+              >
+                Your Reviews
+              </li>
+              <hr />
+            </ul>
           </div>
-        </>
+          <div className="p-5 bg-gray-200 flex flex-col w-full rounded-lg my-auto">
+            <h1 className="text-sm">{tab}</h1>
+            {tab === "Personal Information" ? (
+              renderPersonalInfo()
+            ) : (
+              <div>Content for {tab}</div>
+            )}
+          </div>
+        </div>
+      </>
     </div>
   );
 }

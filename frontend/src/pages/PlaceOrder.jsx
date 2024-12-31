@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useRef } from 'react'
 import Title from '../components/Title'
 import CartTotal from '../components/CartTotal'
 import { useState } from 'react'
@@ -7,52 +7,19 @@ import { toast } from 'react-toastify'
 import axios from 'axios' 
 import {load} from '@cashfreepayments/cashfree-js';
 import CircularProgress from '@mui/material/CircularProgress'
-import { Button, FormControlLabel, Switch } from '@mui/material'
+import { Box, Button, FormControlLabel, MenuItem, Select, Switch, Typography } from '@mui/material'
+
+import AddressFormDialog from '../components/AddressFormDialog'
 
 const PlaceOrder = () => {
+
+  const {navigate, backendUrl, token, cartItems, setCartItems,setSelectedAddress, addresses,addressFormSubmitted, setAddressFormSubmitted,
+         getCartAmount, delivery_fee, products,selectedAddress,open,setOpen} = useContext(ShopContext);
   const [loading, setLoading] = useState(false);
-  const [checked, setChecked] = useState(false);
-  const [method,setMethod] = useState('cashfree');
-  const{navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products} = useContext(ShopContext);
+  const [cod, setCod] = useState(false);
+  const [couriers, setCouriers] = useState([]);
+  const [selectedCourier, setSelectedCourier] = useState({id:"001",name:"Default",cost:delivery_fee});
 
-  const handleChange = (event)=>{
-    setChecked(event.target.checked);
-       if(event.target.checked){
-        setMethod('cod');
-       }else{
-        setMethod('cashfree')
-       }
-  }
-  let cashfree;
-  let initializeSDK = async function () {
-    cashfree = await load({
-      mode: import.meta.env.VITE_CASHFREE_MODE // or production
-    });
-  }
-  initializeSDK();
-  const returnURL = import.meta.env.VITE_CASHFREE_MODE==="sandbox"?"http://localhost:5173":"https://adityatrend.vercel.app";
-  const [formData, setFormData] = useState({
-    name:'',
-    email:'',
-    number:'',
-    address1:'',
-    pincode:'',
-    city:'',
-    state:'',
-    country:''
-  })
-
-  const onChangeHandler = (event) => {
-    const name = event.target.name;
-    const value = event.target.value;
-
-    setFormData(data => ({...data,[name]:value}))
-  }
-
-  const onSubmitHandler = async (event) => {
-    event.preventDefault()
-    try {
-      setLoading(true);
       let orderItems = []
       let printroveItems = [];
 
@@ -77,13 +44,54 @@ const PlaceOrder = () => {
         }
       }
 
+    const verifyAddress = async () => {
+      setLoading(true)
+      const data = {
+        country: selectedAddress.country,
+        pincode: selectedAddress.pincode,
+        weight: 500,
+        cod: cod,
+      };
+      const response = await axios.post(
+        backendUrl + "/api/address/servicability",
+        { data: data },
+        { headers: { token } }
+      );
+      console.log(response.data);
+      if (response.data.success && printroveItems.length > 0) {
+        setCouriers(response.data.message.couriers);
+        setSelectedCourier(response.data.message.couriers[0])
+      } setLoading(false)
+    }
+
+    useEffect(() => {
+      
+      verifyAddress()      
+    }, [cartItems,selectedAddress,addressFormSubmitted])
+
+
+
+  let cashfree;
+  let initializeSDK = async function () {
+    cashfree = await load({
+      mode: import.meta.env.VITE_CASHFREE_MODE // or production
+    });
+  }
+  initializeSDK();
+  const returnURL = import.meta.env.VITE_CASHFREE_MODE==="sandbox"?"http://localhost:5173":"https://adityatrend.vercel.app";
+  const onSubmitHandler = async (event) => {
+    event.preventDefault()
+    try {
+      setLoading(true);
+      selectedAddress.courier=selectedCourier;
       let orderData = {
-        address: formData,
+        address: selectedAddress,
         items:orderItems,
         printroveItems:printroveItems,
         amount:getCartAmount()+delivery_fee,
       }
       const handleCashfree = async () => {   
+        setLoading(true)
         try { 
           const { data } = await axios.post(backendUrl+"/api/order/cashfree", orderData, {
             headers: { token },
@@ -128,13 +136,15 @@ const PlaceOrder = () => {
           });
         } catch (error) {
           console.error("Error during payment processing:", error.message);
-          alert("An error occurred while processing your payment. Please try again.");
+          toast.error(error.message)
         }
       };
       
-      switch (method) {
+      switch (cod) {
          //API Calls for COD
-         case 'cod':
+         case true:
+          console.log("ORDERING VIA COD");
+          
           const response = await axios.post(backendUrl+'/api/order/place',orderData,{headers:{token}});
           console.log(response.data)
           if (response.data.success) {
@@ -153,15 +163,13 @@ const PlaceOrder = () => {
               toast.error(responseStripe.data.message)
             }
           break;
-          case 'cashfree': 
+          case false: 
             if(token)
              handleCashfree();
             else{
               toast.error("Login First");
               navigate('/login');
-            }
-              
-              break;
+            }break;
           default:
             break;
       }
@@ -171,149 +179,130 @@ const PlaceOrder = () => {
       console.log(error);
     }
   }
+
+  const handleChange = (event) => {
+    const selectedId = event.target.value;
+    const courier = couriers.find((courier) => courier.id === selectedId);
+    setSelectedCourier(courier)
+  };
   
   return (
-    <form
-      onSubmit={onSubmitHandler}
-      className="flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t"
-    >
-      {/*-------------- Left Side ---------------*/}
-      <div className="flex flex-col gap-4 w-full sm:max-w-[480px]">
-        <div className="text-xl sm:text-2xl my-3">
+    <div className="flex flex-col sm:flex-row justify-between gap-8 pt-5 sm:pt-14 min-h-[80vh] border-t">
+      {/* Left Side */}
+      <div
+        className={`flex flex-col gap-6 w-full sm:max-w-[480px] ${
+          addresses.length === 0 && !addressFormSubmitted ? "hidden" : ""
+        }`}
+      >
+        <div
+          className="text-xl sm:text-2xl my-6" >
           <Title text1={"DELIVERY"} text2={"INFORMATION"} />
         </div>
-        <div className="flex gap-3">
-          <input
-            required
-            onChange={onChangeHandler}
-            name="name"
-            value={formData.name}
-            className="border border-grey-300 rounded py-1.5 px-3.5 w-full"
-            type="text"
-            placeholder="Name"
-          />
-        </div>
-        <input
-          required
-          onChange={onChangeHandler}
-          name="email"
-          value={formData.email}
-          className="border border-grey-300 rounded py-1.5 px-3.5 w-full"
-          type="email"
-          placeholder="Email Address"
-        />
-        <input
-          required
-          onChange={onChangeHandler}
-          name="address1"
-          value={formData.address1}
-          className="border border-grey-300 rounded py-1.5 px-3.5 w-full"
-          type="text"
-          placeholder="Address"
-        />
-        {/* <input required onChange={onChangeHandler} name='name' value={formData.name} className='border border-grey-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='First Name' /> */}
-        <div className="flex gap-3">
-          <input
-            required
-            onChange={onChangeHandler}
-            name="city"
-            value={formData.city}
-            className="border border-grey-300 rounded py-1.5 px-3.5 w-full"
-            type="text"
-            placeholder="City"
-          />
-          <input
-            required
-            onChange={onChangeHandler}
-            name="state"
-            value={formData.state}
-            className="border border-grey-300 rounded py-1.5 px-3.5 w-full"
-            type="text"
-            placeholder="State"
-          />
-        </div>
 
-        <div className="flex gap-3">
-          <input
-            required
-            onChange={onChangeHandler}
-            name="pincode"
-            value={formData.pincode}
-            className="border border-grey-300 rounded py-1.5 px-3.5 w-full"
-            type="number"
-            placeholder="Pincode"
-          />
-          <input
-            required
-            onChange={onChangeHandler}
-            name="country"
-            value={formData.country}
-            className="border border-grey-300 rounded py-1.5 px-3.5 w-full"
-            type="text"
-            placeholder="Country"
-          />
-        </div>
-
-        <input
-          required
-          onChange={onChangeHandler}
-          name="number"
-          value={formData.number}
-          className="border border-grey-300 rounded py-1.5 px-3.5 w-full"
-          type="number"
-          placeholder="Phone"
+        <AddressFormDialog
+          addressFormSubmitted={addressFormSubmitted}
+          setAddressFormSubmitted={setAddressFormSubmitted}
         />
+
+        {/* Courier Selection */}
+        {couriers.length > 0 && (
+          <Select
+            value={selectedCourier?.id || ""}
+            onChange={handleChange}
+            displayEmpty
+            fullWidth
+            className="flex justify-between p-2 rounded-md border border-gray-300"
+          >
+            {couriers.map((courier) => (
+              <MenuItem key={courier.id} value={courier.id}>
+                <Box className="flex items-center justify-between w-full">
+                  <span>{courier.name}</span>
+                  <span>₹{courier.cost}</span>
+                </Box>
+              </MenuItem>
+            ))}
+          </Select>
+        )}
       </div>
 
-      {/* --------Right Side ---------------- */}
-
-      <div className="mt-8">
+      {/* Right Side */}
+      <form onSubmit={onSubmitHandler} className="flex flex-col gap-8">
         <div className="mt-8 min-w-80">
           <CartTotal />
         </div>
-
         <div className="mt-12">
-          {/* -------------Payment Method Selection */}
-          <div   className={`border-2 rounded-full flex justify-center items-center transition-colors duration-300 
-          ${checked ? 'border-green-500 bg-green-100' : 'border-black bg-white'}`}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={checked}
-                onChange={handleChange}
-                color="success" // Customize the switch color
-              />
-            }
-            label={ 
-                "Cash on Delivery"
-            }
-          />
+          <div
+            className={`border-2 rounded-full flex justify-center items-center transition-colors duration-300 
+          ${
+            cod ? "border-green-500 bg-green-100" : "border-black bg-white"
+          } p-2`}
+          >
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={cod}
+                  onChange={(e) => setCod(e.target.checked)}
+                  color="success"
+                />
+              }
+              label={"Cash on Delivery"}
+            />
           </div>
 
           <div className="w-full flex sm:justify-end justify-center mt-8">
-            <Button
-              sx={{
-                width: "200px",
-                height: "56px",
-                display: "flex",
-                justifyContent: "center",
-                backgroundColor: "black", 
-                color: "white", 
-                "&:hover": {
-                  backgroundColor: "gray", 
-                },
-              }}
-              type="submit"
-              variant="contained"
-              disabled={loading}
-              size="large"
-            >
-              {loading ? <CircularProgress color="inherit" /> : "PLACE ORDER"}
-            </Button>
+            {addresses.length === 0 && !addressFormSubmitted ? (
+              <Button
+                sx={{
+                  width: "200px",
+                  height: "56px",
+                  display: "flex",
+                  justifyContent: "center",
+                  backgroundColor: "black",
+                  color: "white",
+                  "&:hover": {
+                    backgroundColor: "gray",
+                  },
+                }}
+                variant="contained"
+                disabled={addresses.length > 0 && addressFormSubmitted}
+                size="large"
+                onClick={() => setOpen(true)}
+              >
+                Add address
+              </Button>
+            ) : (
+              <Button
+                sx={{
+                  width: "200px",
+                  height: "56px",
+                  display: "flex",
+                  justifyContent: "center",
+                  backgroundColor: "black",
+                  color: "white",
+                  "&:hover": {
+                    backgroundColor: "gray",
+                  },
+                }}
+                type="submit"
+                variant="contained"
+                disabled={
+                  loading || (addresses.length === 0 && !addressFormSubmitted)
+                }
+                size="large"
+              >
+                {addresses.length === 0 && !addressFormSubmitted ? (
+                  "Select Address"
+                ) : loading ? (
+                  <CircularProgress color="inherit" />
+                ) : (
+                  "PLACE ORDER"
+                )}
+              </Button>
+            )}
           </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 }
 

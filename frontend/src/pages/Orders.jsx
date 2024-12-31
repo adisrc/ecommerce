@@ -7,12 +7,13 @@ const Orders = () => {
   const {backendUrl,token, currency} = useContext(ShopContext);
   const [orderData,setorderData] = useState([])
   const loadOrderData = async () => {
-    try {
       if (!token) {
         return null
       }
-      const response = await axios.post(backendUrl+'/api/order/userorders',{},{headers:{token}});
-  
+      const response = await axios.post(backendUrl + '/api/order/userorders', {}, { headers: { token } })
+      .catch((error) => {
+        console.error("Error fetching orders:", error);
+      });  
       if(response.data.success){
         let allOrdersItem = []
         response.data.orders.map((order)=>{
@@ -23,16 +24,10 @@ const Orders = () => {
               item['paymentMethod'] = order.paymentMethod
               item['date'] = order.date
               allOrdersItem.push(item)
-
            })
         })
-        setorderData(allOrdersItem.reverse());
-        
-      }
-      
-    } catch (error) {
-      
-    }
+        setorderData(allOrdersItem.reverse());    
+      } 
   }
 
   useEffect(()=>{

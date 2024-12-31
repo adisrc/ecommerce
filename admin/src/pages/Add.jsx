@@ -22,23 +22,23 @@ const Add = ({token}) => {
     const onSubmitHandler = async (e)=>{
         e.preventDefault();
         try {
-            const formData = new FormData();
-            formData.append("name",name);
-            formData.append("description",description);
-            formData.append("price",price);
-            formData.append("category",category);
-            formData.append("subCategory",subCategory);
-            formData.append("bestseller",bestseller);
-            formData.append("sizes",JSON.stringify(sizes));
+            const selectedAddress = new selectedAddress();
+            selectedAddress.append("name",name);
+            selectedAddress.append("description",description);
+            selectedAddress.append("price",price);
+            selectedAddress.append("category",category);
+            selectedAddress.append("subCategory",subCategory);
+            selectedAddress.append("bestseller",bestseller);
+            selectedAddress.append("sizes",JSON.stringify(sizes));
 
-            image1 &&formData.append("image1",image1);
-            image2 && formData.append("image2",image2);
-            image3 &&formData.append("image3",image3);
-            image4 &&formData.append("image4",image4);
+            image1 &&selectedAddress.append("image1",image1);
+            image2 && selectedAddress.append("image2",image2);
+            image3 &&selectedAddress.append("image3",image3);
+            image4 &&selectedAddress.append("image4",image4);
 
-            console.log(formData);
+            console.log(selectedAddress);
 
-             const response = await axios.post(backendUrl+"/api/product/add",formData,{headers:{token}});
+             const response = await axios.post(backendUrl+"/api/product/add",selectedAddress,{headers:{token}});
              
              if(response.data.success){
                 toast.success(response.data.message);

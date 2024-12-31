@@ -15,18 +15,18 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 const handlePrintroveOrder = async (printroveItems,address,newOrder,method) => {
     const totalAmount = printroveItems.reduce( (total, item) => total + item.quantity * item.price,0);        
-        const order_products = printroveItems.map((item)=>({
-        quantity:item.quantity,
-        variant_id:item.variantID
-    }))
-
-    const printroveOrderData = {
-        "reference_number": newOrder._id.toString(),
-        "retail_price": totalAmount,
-        "customer":address,
-        order_products,
-        "cod":method
-    }
+        const order_products = printroveItems.map((item) => ({
+          quantity: item.quantity,
+          variant_id: item.variantID,
+        }));
+        const printroveOrderData = {
+          reference_number: newOrder._id.toString(),
+          retail_price: totalAmount,
+          customer: address,
+          order_products,
+          courier_id: address.courier.id,
+          cod: method,
+        };
     try {
         const printrove_response = await axios.post(
             'https://api.printrove.com/api/external/orders',

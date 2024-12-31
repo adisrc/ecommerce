@@ -19,6 +19,7 @@ import Terms from './pages/Terms';
 import Refund from './pages/Refund';
 import Profile from './pages/Profile';
 import ScrollToTop from './components/ScrollToTop';
+import AddressFormDialog from './components/AddressFormDialog';
 const App = () => {
   return (
     <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
@@ -40,6 +41,7 @@ const App = () => {
         <Route path='/terms' element={<Terms/>}/>
         <Route path='/refund' element={<Refund/>}/> 
         <Route path='/profile' element={<Profile/>}/> 
+        <Route path='/address' element={<AddressFormDialog/>}/> 
       </Routes>
       <Footer/>
     </div>

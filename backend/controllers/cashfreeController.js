@@ -1,6 +1,5 @@
 import orderModel from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
-import axios from 'axios';
 import dotenv from 'dotenv';
 dotenv.config();  // Load .env file
 import { Cashfree } from "cashfree-pg"; 
@@ -9,13 +8,8 @@ Cashfree.XClientId = process.env.CASHFREE_MODE=='production'?process.env.CASHFRE
 Cashfree.XClientSecret = process.env.CASHFREE_MODE=='production'?process.env.CASHFREE_SECRET_KEY:process.env.CASHFREE_SECRET_KEY_TEST;
 Cashfree.XEnvironment = process.env.CASHFREE_MODE=='production'? Cashfree.Environment.PRODUCTION:Cashfree.Environment.SANDBOX;
 
-
-const currency = 'inr'
-const deliveryCharge = 10
-
 export const placeOrderCashfree = async (req, res) => {
     const { address, items, printroveItems, amount, userId } = req.body;
-  
     // Validate required fields
     if (!address || !items || !amount || !userId) {
       return res.status(400).json({
@@ -48,7 +42,7 @@ export const placeOrderCashfree = async (req, res) => {
       // Prepare data for Cashfree
       const data = {
         order_amount: amount,
-        order_currency: currency.toUpperCase(),
+        order_currency: 'INR',
         order_id: savedOrder._id,
         customer_details: {
           customer_id: userId,
@@ -63,7 +57,6 @@ export const placeOrderCashfree = async (req, res) => {
   
       // Send request to Cashfree
       Cashfree.PGCreateOrder("2022-09-01", data).then((response) => {
-        console.log('Order Created successfully:',response.data)
         return res.status(201).json({
             success: true,
             message: "Order created successfully.",
@@ -71,7 +64,6 @@ export const placeOrderCashfree = async (req, res) => {
             paymentId: response.data.payment_session_id,
           });
     }).catch((error) => {
-        console.error('Error:', error.response.data.message);
         return res.status(500).json({
             success: false,
             message: "An error occurred while creating the order.",
@@ -80,7 +72,6 @@ export const placeOrderCashfree = async (req, res) => {
     });
 
     } catch (error) {
-      console.error("Error in placeOrderCashfree:", error.message);
       return res.status(500).json({
         success: false,
         message: "An error occurred while creating the order.",
@@ -126,9 +117,7 @@ export const placeOrderCashfree = async (req, res) => {
           message: "Payment not completed. Order has been deleted.",
         });
       }
-    } catch (error) {
-      console.error("Error in verifying Cashfree payment:", error.message);
-  
+    } catch (error) {  
       return res.status(500).json({
         success: false,
         message: "An error occurred while verifying payment.",
