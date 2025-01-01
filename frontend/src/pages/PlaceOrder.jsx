@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from 'react'
+import React, { useContext, useEffect } from 'react'
 import Title from '../components/Title'
 import CartTotal from '../components/CartTotal'
 import { useState } from 'react'
@@ -7,44 +7,67 @@ import { toast } from 'react-toastify'
 import axios from 'axios' 
 import {load} from '@cashfreepayments/cashfree-js';
 import CircularProgress from '@mui/material/CircularProgress'
-import { Box, Button, FormControlLabel, MenuItem, Select, Switch, Typography } from '@mui/material'
+import { Button, FormControlLabel,Switch } from '@mui/material'
 
 import AddressFormDialog from '../components/AddressFormDialog'
 
 const PlaceOrder = () => {
 
-  const {navigate, backendUrl, token, cartItems, setCartItems,setSelectedAddress, addresses,addressFormSubmitted, setAddressFormSubmitted,
-         getCartAmount, delivery_fee, products,selectedAddress,open,setOpen} = useContext(ShopContext);
+  const {
+    navigate,
+    backendUrl,
+    token,
+    cartItems,
+    setCartItems,
+    addresses,
+    addressFormSubmitted,
+    selectedCourier,
+    setSelectedCourier,
+    couriers,
+    setCouriers,
+    getCartAmount,
+    delivery_fee,
+    products,
+    selectedAddress,
+    open,
+    setOpen,
+  } = useContext(ShopContext);
+  
   const [loading, setLoading] = useState(false);
   const [cod, setCod] = useState(false);
-  const [couriers, setCouriers] = useState([]);
-  const [selectedCourier, setSelectedCourier] = useState({id:"001",name:"Default",cost:delivery_fee});
+  const [orderItems, setOrderItems] = useState([]);
+  const [printroveItems, setPrintroveItems] = useState([]); 
 
-      let orderItems = []
-      let printroveItems = [];
-
-      for (const items in cartItems) {
-        for (const item in cartItems[items]) {
-          if (cartItems[items][item] > 0) {
-            const itemInfo = structuredClone(
-              products.find((product) => product._id === items)
-            );
-            if (itemInfo) {
-              itemInfo.size = item;
-              itemInfo.quantity = cartItems[items][item];
-
-              if (itemInfo.printrove) {
-                itemInfo.variantID = itemInfo.variants[item]; // Dynamically assign variantId
-                printroveItems.push(itemInfo); // Add to printroveItems array
-              } else {
-                orderItems.push(itemInfo); // Add to orderItems array
+        const populateItems = () => {
+        const tempOrderItems = [];
+        const tempPrintroveItems = [];
+    
+        for (const items in cartItems) {
+          for (const item in cartItems[items]) {
+            if (cartItems[items][item] > 0) {
+              const itemInfo = structuredClone(
+                products.find((product) => product._id === items)
+              );
+              if (itemInfo) {
+                itemInfo.size = item;
+                itemInfo.quantity = cartItems[items][item];
+    
+                if (itemInfo.printrove) {
+                  itemInfo.variantID = itemInfo.variants[item]; // Assign variantId dynamically
+                  tempPrintroveItems.push(itemInfo); // Add to printroveItems
+                } else {
+                  tempOrderItems.push(itemInfo); // Add to orderItems
+                }
               }
             }
           }
         }
-      }
+        setOrderItems(tempOrderItems);
+        setPrintroveItems(tempPrintroveItems);
+      };
 
-    const verifyAddress = async () => {
+      const getCouriers = async () => { 
+      if(printroveItems.length>0){
       setLoading(true)
       const data = {
         country: selectedAddress.country,
@@ -62,12 +85,19 @@ const PlaceOrder = () => {
         setCouriers(response.data.message.couriers);
         setSelectedCourier(response.data.message.couriers[0])
       } setLoading(false)
+    }else{
+      setCouriers([{ id: "-1", name: "Default", cost: 0 },])
+      setSelectedCourier(couriers[0])
+    }
     }
 
     useEffect(() => {
-      
-      verifyAddress()      
-    }, [cartItems,selectedAddress,addressFormSubmitted])
+      populateItems();
+    }, [cartItems, products]);
+
+    useEffect(() => {
+      getCouriers()      
+    }, [cartItems,selectedAddress,addressFormSubmitted,printroveItems,orderItems])
 
 
 
@@ -179,50 +209,21 @@ const PlaceOrder = () => {
       console.log(error);
     }
   }
-
-  const handleChange = (event) => {
-    const selectedId = event.target.value;
-    const courier = couriers.find((courier) => courier.id === selectedId);
-    setSelectedCourier(courier)
-  };
+  useEffect(() => {
+    console.log(selectedAddress);    
+  }, [selectedAddress])
   
   return (
     <div className="flex flex-col sm:flex-row justify-between gap-8 pt-5 sm:pt-14 min-h-[80vh] border-t">
       {/* Left Side */}
+
       <div
-        className={`flex flex-col gap-6 w-full sm:max-w-[480px] ${
-          addresses.length === 0 && !addressFormSubmitted ? "hidden" : ""
-        }`}
-      >
+        className="flex flex-col gap-6 w-full sm:max-w-[480px]">
         <div
           className="text-xl sm:text-2xl my-6" >
           <Title text1={"DELIVERY"} text2={"INFORMATION"} />
         </div>
-
-        <AddressFormDialog
-          addressFormSubmitted={addressFormSubmitted}
-          setAddressFormSubmitted={setAddressFormSubmitted}
-        />
-
-        {/* Courier Selection */}
-        {couriers.length > 0 && (
-          <Select
-            value={selectedCourier?.id || ""}
-            onChange={handleChange}
-            displayEmpty
-            fullWidth
-            className="flex justify-between p-2 rounded-md border border-gray-300"
-          >
-            {couriers.map((courier) => (
-              <MenuItem key={courier.id} value={courier.id}>
-                <Box className="flex items-center justify-between w-full">
-                  <span>{courier.name}</span>
-                  <span>₹{courier.cost}</span>
-                </Box>
-              </MenuItem>
-            ))}
-          </Select>
-        )}
+          <AddressFormDialog /> 
       </div>
 
       {/* Right Side */}
@@ -250,27 +251,7 @@ const PlaceOrder = () => {
           </div>
 
           <div className="w-full flex sm:justify-end justify-center mt-8">
-            {addresses.length === 0 && !addressFormSubmitted ? (
-              <Button
-                sx={{
-                  width: "200px",
-                  height: "56px",
-                  display: "flex",
-                  justifyContent: "center",
-                  backgroundColor: "black",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "gray",
-                  },
-                }}
-                variant="contained"
-                disabled={addresses.length > 0 && addressFormSubmitted}
-                size="large"
-                onClick={() => setOpen(true)}
-              >
-                Add address
-              </Button>
-            ) : (
+ 
               <Button
                 sx={{
                   width: "200px",
@@ -290,7 +271,7 @@ const PlaceOrder = () => {
                 }
                 size="large"
               >
-                {addresses.length === 0 && !addressFormSubmitted ? (
+                {(addresses.length === 0 && !addressFormSubmitted) ? (
                   "Select Address"
                 ) : loading ? (
                   <CircularProgress color="inherit" />
@@ -298,8 +279,7 @@ const PlaceOrder = () => {
                   "PLACE ORDER"
                 )}
               </Button>
-            )}
-          </div>
+           </div>
         </div>
       </form>
     </div>

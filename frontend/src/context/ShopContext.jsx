@@ -15,30 +15,33 @@ const ShopContextProvider = (props)=>{
     const [showSearch, setShowSearch] = useState(false);
     const [cartItems, setCartItems] = useState({});
     const [products, setProducts] = useState([]);
-    const [token,setToken] = useState('');
+    const [token, setToken] = useState("");
     const [showGoToCart, setShowGoToCart] = useState(false);
-    const [userData,  setUserData] = useState({});
+    const [userData, setUserData] = useState({});
     //Addresses
-      const [showAddresses, setShowAddresses] = useState(false);
-      const [addressFormSubmitted, setAddressFormSubmitted] = useState(false);
-      const [open, setOpen] = useState(false);
-      const [addresses, setAddresses] = useState([]);
-      const [defaultAddress, setDefaultAddress]= useState({});
-      const [selectedAddress, setSelectedAddress] = useState({
-        name:'',
-        email:'',
-        number:'',
-        address1:'',
-        pincode:'',
-        city:'',
-        state:'',
-        country:'',
-        save:true,
-        default:true,
-        courier:{id:"001",name:"Default",cost:delivery_fee},
-      })
+    const [showAddresses, setShowAddresses] = useState(false);
+    const [addressFormSubmitted, setAddressFormSubmitted] = useState(false);
+    const [couriers, setCouriers] = useState([
+      { id: "-1", name: "Default", cost: 0 },
+    ]);
+    const [selectedCourier, setSelectedCourier] = useState(couriers[0]);
+    const [open, setOpen] = useState(false);
+    const [addresses, setAddresses] = useState([]);
+    const [defaultAddress, setDefaultAddress] = useState({});
+    const [selectedAddress, setSelectedAddress] = useState({
+      name: "",
+      email: "",
+      number: "",
+      address1: "",
+      pincode: "",
+      city: "",
+      state: "",
+      country: "",
+      save: true,
+      default: true,
+    });
 
-    const navigate= useNavigate();
+    const navigate = useNavigate();
 
 
       const loadAddressData = async () => {
@@ -198,7 +201,8 @@ const ShopContextProvider = (props)=>{
       getCartAmount,navigate,backendUrl,printroveKey,
       setToken,token,setCartItems,showGoToCart, setShowGoToCart,selectedAddress,setSelectedAddress,
       showAddresses, setShowAddresses,addresses, setAddresses,defaultAddress,setDefaultAddress,loadAddressData,
-      open,setOpen,addressFormSubmitted, setAddressFormSubmitted
+      open,setOpen,addressFormSubmitted, setAddressFormSubmitted,
+      selectedCourier, setSelectedCourier,couriers,setCouriers
     }
 
     return (

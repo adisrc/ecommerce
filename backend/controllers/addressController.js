@@ -18,7 +18,7 @@ export const checkPincode = async (req, res) => {
             res.json({success:true,message:response.data});
         else throw new Error('No valid response data from the external API');
     } catch (error) { 
-        res.json({success:false,message:"Not Available"})
+        res.json({success:false,message:"INVALID PIN CODE"})
       }
   };
 
@@ -50,7 +50,6 @@ export const checkPincode = async (req, res) => {
   export const saveAddress = async (req, res) => {
     try {
       const { userId, newAddress } = req.body;
-      console.log(req.body);
       newAddress.userId = userId;
   
       if (newAddress.default) {
@@ -64,7 +63,7 @@ export const checkPincode = async (req, res) => {
       await newAddressData.save();
   
       if (newAddressData.default)
-      res.json({ success: true, message: "Address Saved as default" });
+      res.json({ success: true, message: "Address Saved as Default" });
     else
       res.json({ success: true, message: "Address Saved" });
     } catch (error) {
@@ -100,7 +99,7 @@ export const checkPincode = async (req, res) => {
   };
 
   export const deleteAddress = async (req,res) => {
-    const {addressId} = req.body;    
+    const {addressId} = req.body;  
     try {
         if(addressId){
             await addressModel.findByIdAndDelete(addressId);
