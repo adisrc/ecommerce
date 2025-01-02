@@ -70,8 +70,11 @@ const Product = () => {
           </div>
 
         </div>
-    <div>
-    
+    <div className='md:static fixed bottom-0 z-50 right-4 w-full flex justify-center'
+      style={{
+        background: "linear-gradient(to top, white, transparent)",
+      }}
+    >
       <button 
       onClick={()=>{addToCart(productData._id,size); }} 
        className="bg-black text-white border-2 border-gray-200 rounded-full px-8 py-3 text-sm active:bg-gray-700 m-2 w-42">

@@ -7,9 +7,10 @@ import { toast } from 'react-toastify'
 import axios from 'axios' 
 import {load} from '@cashfreepayments/cashfree-js';
 import CircularProgress from '@mui/material/CircularProgress'
-import { Button, FormControlLabel,Switch } from '@mui/material'
+import { Button, Fab, FormControlLabel,Switch, useMediaQuery } from '@mui/material'
 
 import AddressFormDialog from '../components/AddressFormDialog'
+import { useTheme } from '@emotion/react'
 
 const PlaceOrder = () => {
 
@@ -212,18 +213,21 @@ const PlaceOrder = () => {
   useEffect(() => {
     console.log(selectedAddress);    
   }, [selectedAddress])
+
+  const theme = useTheme(); // Access the theme
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md')); // Check if screen is smaller than 'sm'
+
+ 
   
   return (
     <div className="flex flex-col sm:flex-row justify-between gap-8 pt-5 sm:pt-14 min-h-[80vh] border-t">
       {/* Left Side */}
 
-      <div
-        className="flex flex-col gap-6 w-full sm:max-w-[480px]">
-        <div
-          className="text-xl sm:text-2xl my-6" >
-          <Title text1={"DELIVERY"} text2={"INFORMATION"} />
+      <div className="flex flex-col gap-6 w-full sm:max-w-[480px]">
+        <div className="text-xl sm:text-2xl my-6">
+          <Title text1={"DELIVER"} text2={"TO"} />
         </div>
-          <AddressFormDialog /> 
+        <AddressFormDialog />
       </div>
 
       {/* Right Side */}
@@ -251,35 +255,38 @@ const PlaceOrder = () => {
           </div>
 
           <div className="w-full flex sm:justify-end justify-center mt-8">
- 
-              <Button
-                sx={{
-                  width: "200px",
-                  height: "56px",
-                  display: "flex",
-                  justifyContent: "center",
-                  backgroundColor: "black",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "gray",
-                  },
-                }}
-                type="submit"
-                variant="contained"
-                disabled={
-                  loading || (addresses.length === 0 && !addressFormSubmitted)
-                }
-                size="large"
-              >
-                {(addresses.length === 0 && !addressFormSubmitted) ? (
-                  "Select Address"
-                ) : loading ? (
-                  <CircularProgress color="inherit" />
-                ) : (
-                  "PLACE ORDER"
-                )}
-              </Button>
-           </div>
+            {<Fab 
+            onClick={onSubmitHandler} 
+            sx={{
+              position: isSmallScreen ? 'fixed' : 'static', // Use 'static' when it's not a small screen
+              bottom: isSmallScreen ? '16px' : 'auto', // Only apply bottom when it's a small screen
+              left: isSmallScreen ? '50%' : 'auto', // Only apply left when it's a small screen
+              transform: isSmallScreen ? 'translateX(-50%)' : 'none', // Only apply translateX on small screen
+              zIndex: 50,
+              width: '200px', // Same width as Button
+              height: '56px', // Same height as Button
+              display: 'flex',
+              justifyContent: 'center',
+              backgroundColor: 'black', // Same background color as Button
+              color: 'white', // Same text color as Button
+              '&:hover': {
+                backgroundColor: 'gray', // Same hover effect as Button
+              },
+            }}
+      variant="extended"
+      color="primary"
+      disabled={loading || (addresses.length === 0 && !addressFormSubmitted)}
+    >
+      {loading ? (
+        <CircularProgress color="inherit" size={24} />
+      ) : addresses.length === 0 && !addressFormSubmitted ? (
+        "Select Address"
+      ) : (
+        "PLACE ORDER"
+      )}
+    </Fab>}
+
+          </div>
         </div>
       </form>
     </div>

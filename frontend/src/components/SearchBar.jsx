@@ -1,32 +1,88 @@
-import React, {useState, useContext,useEffect } from 'react'
-import { ShopContext } from '../context/ShopContext'
+import React, { useState, useContext, useEffect, useRef } from 'react';
+import { ShopContext } from '../context/ShopContext';
+import { useLocation, useNavigate } from 'react-router-dom';
+import Box from '@mui/material/Box';
+import InputBase from '@mui/material/InputBase';
+import SearchIcon from '@mui/icons-material/Search';
+import CloseIcon from '@mui/icons-material/Close';
+import IconButton from '@mui/material/IconButton';
 
-import { assets } from '../assets/assets';
-import { useLocation } from 'react-router-dom';
 const SearchBar = () => {
-    const{search,setSearch,showSearch, setShowSearch} = useContext(ShopContext);
-    const [visible,setVisible] = useState(false);
-    
-    const location = useLocation(); 
-    useEffect(() => {
-      if(location.pathname.includes('collection')){
-           setVisible(true);
-      }else{
-        setVisible(false);
+  const { search, setSearch, showSearch, setShowSearch } = useContext(ShopContext);
+  const [visible, setVisible] = useState(true);
+  const inputRef = useRef(null);
+  const searchBarRef = useRef(null); // Reference for the whole search bar
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.pathname.includes('collection')) {
+      setVisible(true);
+    } else {
+      setVisible(false);
+    }
+  }, [location]);
+
+  // Focus input when search bar is visible
+  useEffect(() => {
+    if (visible && showSearch && inputRef.current) {
+      inputRef.current.focus(); // Focus the input field
+    }
+  }, [visible, showSearch]);
+
+  // Close search when clicked outside of the search bar
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchBarRef.current && !searchBarRef.current.contains(event.target)) {
+        setShowSearch(false);
       }
-    }, [location])
-    
-  return showSearch&&visible?(
-    <div className='border-t border-b bg-gray-50 text-center'>
-        <div className='inline-flex items-center justify-center border border-gray-400 px-5 py-2 my-5 mx-3 rounded-full w-3/4 sm:w-1/2'>
-        <input value={search} onChange={(e)=>setSearch(e.target.value)} className='flex-1 outline-none bg-inherit text-sm' type="text" placeholder='Search'/>
-        <img className='w-4' src={assets.search_icon} alt="" />
-        </div>
+    };
 
-        <img onClick={()=>{setShowSearch(false)}} className='inline w-3 cursor-pointer' src={assets.cross_icon} alt="" />
-        
-    </div>
-  ):null
-}
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-export default SearchBar
+  return (
+    <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }} ref={searchBarRef}>
+      {showSearch ? (
+        <>
+          <div>
+            <input type='text'
+              ref={inputRef}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search…"
+              inputProps={{ 'aria-label': 'search' }}
+              style={{
+                backgroundColor: "gray",
+                borderRadius: "50px",
+                paddingLeft: "20px",
+                color: "white"
+              }}
+            />
+          </div>
+          <IconButton
+            color="inherit"
+            onClick={() => setShowSearch(false)}
+            sx={{ ml: 1 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </>
+      ) : (
+        <IconButton
+          color="inherit"
+          onClick={() => {
+            if (location.pathname !== '/collection') navigate('/collection');
+            setShowSearch(true);
+          }}
+          sx={{ ml: 1 }}
+        >
+          <SearchIcon />
+        </IconButton>
+      )}
+    </Box>
+  );
+};
+
+export default SearchBar;
