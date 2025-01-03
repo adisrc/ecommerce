@@ -301,7 +301,7 @@ function Profile() {
         </button>
         <div className="flex">
           <div
-            className={` absolute top-0 left-0 bottom-0 overflow-hidden bg-white sm:border-gray-300 border-2 transition-all 
+            className={` absolute top-[70px] left-0 bottom-0 overflow-hidden bg-white sm:border-gray-300 border-2 transition-all 
           ${visible ? "w-3/4" : "w-0"}
                sm:w-1/2 sm:relative sm:rounded-lg sm: mr-2`}
           >

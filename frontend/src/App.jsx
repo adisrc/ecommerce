@@ -26,7 +26,7 @@ const App = () => {
       <div className="w-full fixed top-0 left-0 z-50">
         <ResponsiveAppBar />
       </div>
-      <div className="py-[56px] px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
+      <div className="pt-[70px] pb-[56px] px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
         <ToastContainer />
         <ScrollToTop />
         <Routes>
