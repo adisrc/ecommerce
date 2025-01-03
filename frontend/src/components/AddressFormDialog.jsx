@@ -92,7 +92,7 @@ export default function AddressFormDialog() {
         <>
           <AddressCard address={selectedAddress} />
 
-          <div className="flex p-2 justify-end">
+          <div className="flex p-2 justify-center m-2">
             <ButtonGroup variant="outlined" aria-label="Compact button group">
               <Button onClick={() => setShowAddresses(true)}>
                 <HomeIcon className="mr-1" />

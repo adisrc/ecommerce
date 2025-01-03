@@ -38,11 +38,11 @@ function Pages({ handleCloseNavMenu }) {
                 sx={{
                   fontWeight: isActive ? 700 : 500, // Bold text for active route
                   textTransform: "uppercase",
-                  color: isActive ? "white" : "GrayText", // Set color based on active route
+                  color: isActive ? "#DFFF00" : "white", // Set color based on active route
                   padding: isActive ? "0.3rem 0.6rem" : "0", // Padding for active state
                   borderRadius: "5px", // Rounded corners for the active state
                   "&:hover": {
-                    color: "white",
+                    color: "#DFFF00",
                   },
                   transition: "all 0.3s ease", // Smooth transition for all properties
                 }}
@@ -150,9 +150,12 @@ function ResponsiveAppBar() {
               fontWeight: 700,
               letterSpacing: ".3rem",
               textDecoration: "none",
+              "&:hover": {
+                color: "#DFFF00",
+              },
             }}
           >
-            ADITYA
+            Sarky
           </Typography>
 
          
@@ -175,12 +178,12 @@ function ResponsiveAppBar() {
                 </Badge>
               </IconButton>
 
-              <Tooltip title="Open settings">
+              <Tooltip title="Open Menu">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                   {userData && (
                     <Avatar
                       className="ml-4"
-                      alt="Aditya Sharp"
+                      alt="Profile"
                       src={userData.photoURL || "/static/images/avatar/2.jpg"}
                     />
                   )}
@@ -229,9 +232,9 @@ function ResponsiveAppBar() {
                           textAlign: "center",
                           textTransform: "capitalize",
                           fontWeight: isActive ? 700 : 500, // Bold for active menu item
-                          color: isActive ? "white" : "gray", // White for active menu item
+                          color: isActive ? "#DFFF00" : "gray", // White for active menu item
                           "&:hover": {
-                            color: "white",
+                            color: "#DFFF00",
                           },
                           transition: "color 0.3s ease, transform 0.3s ease",
                           cursor: "pointer",

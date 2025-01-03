@@ -52,7 +52,6 @@ const SearchBar = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search…"
-              inputProps={{ 'aria-label': 'search' }}
               style={{
                 backgroundColor: "gray",
                 borderRadius: "50px",

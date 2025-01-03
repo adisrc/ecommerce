@@ -4,10 +4,13 @@ import Title from "../components/Title";
 import { assets } from "../assets/assets";
 import CartTotal from "../components/CartTotal";
 import { toast } from "react-toastify";
+import { useLocation } from "react-router-dom";
 
 const Cart = () => {
   const {token, products, currency, cartItems, updateQuantity, navigate } = useContext(ShopContext);
   const [cartData, setCartData] = useState([]);
+  const location = useLocation();
+
   useEffect(() => {
     if (products.length > 0) {
       const tempData = [];
@@ -26,10 +29,10 @@ const Cart = () => {
     }
   }, [cartItems, products]);
   return (
-    <div className="border-t pt-14">
-      <div className="text-2xl mb-3">
+<div className={`border-t ${location.pathname === '/cart' ? 'pt-14' : ''}`}>
+      {location.pathname === '/cart' && <div className="text-2xl mb-3">
         <Title text1={"YOUR"} text2={"CART"} />
-      </div>
+      </div>}
 
       <div>
         {cartData.map((item, index) => {
@@ -87,11 +90,11 @@ const Cart = () => {
           );
         })}
       </div>
-      <div className="flex justify-end my-20">
+      {location.pathname === '/cart' && <div className="flex justify-end my-20">
         <div className="w-full sm:w-[450px]">
-          <CartTotal />
+        <CartTotal />
 
-          <div className="w-full text-end">
+         <div className="w-full text-end">
             <button
               onClick={() => {
                 if (token) {
@@ -107,7 +110,7 @@ const Cart = () => {
             </button>
           </div>
         </div>
-      </div>
+      </div>}
     </div>
   );
 };

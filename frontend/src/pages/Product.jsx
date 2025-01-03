@@ -3,14 +3,20 @@ import { useParams } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext';
 import { assets } from '../assets/assets';
 import RelatedProducts from '../components/RelatedProducts';
-import { LinearProgress } from '@mui/material';
-
+import { BottomNavigation, BottomNavigationAction, Button, Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress, Popover, Typography, useMediaQuery, useTheme } from '@mui/material';
+import LocalMallIcon from '@mui/icons-material/LocalMall';
+import ResponsiveBottomNavigation from '../components/ResponsiveBottomNav';
 const Product = () => {
   const {productId} = useParams();
   const {products,currency, addToCart,navigate,showGoToCart, setShowGoToCart} = useContext(ShopContext);
   const [productData,setProductData] = useState(false);
   const [image,setImage]= useState('');
   const [size, setSize] = useState('');
+  const [open, setOpen] = useState(false); // State to control the dialog
+  const [anchorEl, setAnchorEl] = useState(null);
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
+
 
   const fetchProductData = async()=>{
    products.map((item)=>{
@@ -70,26 +76,70 @@ const Product = () => {
           </div>
 
         </div>
-    <div className='md:static fixed bottom-0 z-50 right-4 w-full flex justify-center'
-      style={{
-        background: "linear-gradient(to top, white, transparent)",
-      }}
-    >
-      <button 
-      onClick={()=>{addToCart(productData._id,size); }} 
-       className="bg-black text-white border-2 border-gray-200 rounded-full px-8 py-3 text-sm active:bg-gray-700 m-2 w-42">
-        ADD TO CART
+
+{!isSmallScreen&&<div>
+<button 
+      onClick={()=>{showGoToCart?navigate("/cart"):addToCart(productData._id,size)}} 
+       className="bg-black w-120 text-white border-2 border-gray-200 rounded-full px-8 py-3 text-sm active:bg-gray-700 m-2 w-42">
+       {showGoToCart?"GO TO CART":"ADD TO CART"}
         </button>
-      
-    {showGoToCart && (
-        <button
-          onClick={() => {navigate('/cart'); setShowGoToCart(false)}}
-          className="bg-white text-black border-2 border-black rounded-full px-8 py-3 text-sm active:bg-gray-700 m-2 w-42"
-        >
-          GO TO CART
-        </button>
-      )}
+</div>}
+
+<div>
+      <ResponsiveBottomNavigation>
+        {!showGoToCart?<BottomNavigationAction
+        onClick={()=>{
+        if(!size)setOpen(true);    
+        setAnchorEl(event.currentTarget);
+        addToCart(productData._id,size)}
+      } 
+      label="Add to Cart"
+          icon={<LocalMallIcon />}
+        />
+        :<BottomNavigationAction
+          onClick={()=>
+          navigate('/cart')
+        } 
+        label="Go to Cart"
+            icon={<LocalMallIcon />}
+          />
+      }
+      </ResponsiveBottomNavigation>
+   
+
+
+      <Popover
+        open={open}
+        anchorEl={anchorEl} // Element to which the popover is anchored
+        onClose={()=>setOpen(false)}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+        sx={{mt:-8}}
+      >
+        <div className='p-2'>
+        <p>Select Size</p>
+          <div className="flex gap-2 p-4">
+            {productData.sizes.map((item, index) => (
+              <button
+                onClick={() =>{setOpen(false); setSize(item);  addToCart(productData._id,item)}}
+                className={`border py-2 px-4 bg-gray-100 ${item === size ? 'border-orange-500' : ''}`}
+                key={index}
+              > {item}
+              </button>
+            ))}
+          </div>
+        </div>
+      </Popover>
     </div>
+
+
+
      <hr className='mt-8 sm:w-4/5' />
 
      <div className='text-sm text-gray-500 mt-5 flex flex-col gap-1'>

@@ -8,9 +8,15 @@ import axios from 'axios'
 import {load} from '@cashfreepayments/cashfree-js';
 import CircularProgress from '@mui/material/CircularProgress'
 import { Button, Fab, FormControlLabel,Switch, useMediaQuery } from '@mui/material'
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import Typography from '@mui/material/Typography'; 
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 import AddressFormDialog from '../components/AddressFormDialog'
 import { useTheme } from '@emotion/react'
+import Cart from './Cart'
 
 const PlaceOrder = () => {
 
@@ -38,6 +44,7 @@ const PlaceOrder = () => {
   const [cod, setCod] = useState(false);
   const [orderItems, setOrderItems] = useState([]);
   const [printroveItems, setPrintroveItems] = useState([]); 
+  const [method,setMethod] = useState('cod');
 
         const populateItems = () => {
         const tempOrderItems = [];
@@ -171,9 +178,12 @@ const PlaceOrder = () => {
         }
       };
       
-      switch (cod) {
+      switch (method) {
          //API Calls for COD
-         case true:
+         case 'upi':
+          toast.error("UPI")
+          break;
+         case 'cod':
           console.log("ORDERING VIA COD");
           
           const response = await axios.post(backendUrl+'/api/order/place',orderData,{headers:{token}});
@@ -184,17 +194,8 @@ const PlaceOrder = () => {
           } else {
             toast.error(response.data.message);
           }
-          break;
-          case 'stripe':
-            const responseStripe = await axios.post(backendUrl+'/api/order/stripe',orderData,{headers:{token}})
-            if (responseStripe.data.success) {
-              const {session_url} = responseStripe.data
-              window.location.replace(session_url)
-            }else{
-              toast.error(responseStripe.data.message)
-            }
-          break;
-          case false: 
+          break; 
+          case 'cashfree': 
             if(token)
              handleCashfree();
             else{
@@ -223,36 +224,64 @@ const PlaceOrder = () => {
     <div className="flex flex-col sm:flex-row justify-between gap-8 pt-5 sm:pt-14 min-h-[80vh] border-t">
       {/* Left Side */}
 
-      <div className="flex flex-col gap-6 w-full sm:max-w-[480px]">
-        <div className="text-xl sm:text-2xl my-6">
-          <Title text1={"DELIVER"} text2={"TO"} />
-        </div>
+      <div className="flex flex-col gap-6 w-full sm:max-w-[480px]"> 
+        <Accordion>
+        <AccordionSummary expandIcon={<ArrowDropDownIcon />} >
+          <Typography component="span">Delivering to {selectedAddress.name}</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
         <AddressFormDialog />
+
+        </AccordionDetails>
+      </Accordion>
+
+      <Accordion>
+        <AccordionSummary expandIcon={<ArrowDropDownIcon />} >
+          <Typography component="span">Items</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+        <Cart/>
+
+        </AccordionDetails>
+      </Accordion>
+
+
       </div>
 
       {/* Right Side */}
       <form onSubmit={onSubmitHandler} className="flex flex-col gap-8">
+
+      <Title text1={'PAYMENT'} text2={'METHOD'}/>
+          {/* -------------Payment Method Selection */}
+
+          <div className='flex gap-3 flex-col lg:flex-row'>
+            <div onClick={()=>setMethod('upi')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
+              <p className={`min-w-3.5 h-3.5 border rounded-full ${method==='upi'?'bg-green-400':''}`}>
+              </p>
+              <p className='text-gray-500 text-sm font-medium mx-4'>PAY USING UPI</p>
+
+            </div>
+            <div onClick={()=>setMethod('cashfree')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
+              <p className={`min-w-3.5 h-3.5 border rounded-full ${method==='cashfree'?'bg-green-400':''}`}>
+
+              </p>
+              <p className='text-gray-500 text-sm font-medium mx-4'>CASHFREE</p>
+
+            </div>
+            <div onClick={()=>setMethod('cod')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
+              <p className={`min-w-3.5 h-3.5 border rounded-full ${method==='cod'?'bg-green-400':''}`}>
+
+              </p>
+              <p className='text-gray-500 text-sm font-medium mx-4'>CASH ON DELIVERY</p>
+
+            </div>
+          </div>
+
+
         <div className="mt-8 min-w-80">
           <CartTotal />
         </div>
-        <div className="mt-12">
-          <div
-            className={`border-2 rounded-full flex justify-center items-center transition-colors duration-300 
-          ${
-            cod ? "border-green-500 bg-green-100" : "border-black bg-white"
-          } p-2`}
-          >
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={cod}
-                  onChange={(e) => setCod(e.target.checked)}
-                  color="success"
-                />
-              }
-              label={"Cash on Delivery"}
-            />
-          </div>
+        <div className="mt-12"> 
 
           <div className="w-full flex sm:justify-end justify-center mt-8">
             {<Fab 

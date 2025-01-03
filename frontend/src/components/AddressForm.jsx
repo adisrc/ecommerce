@@ -190,7 +190,7 @@ export const AddressForm = () => {
                 defaultChecked
               />
             }
-            label="Save Address"
+            label="Save"
           />
           <FormControlLabel
             control={
@@ -205,7 +205,7 @@ export const AddressForm = () => {
                 defaultChecked
               />
             }
-            label="Set as Default Address"
+            label="Default"
           />
         </div>
         <Button
