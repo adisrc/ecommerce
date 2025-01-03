@@ -193,11 +193,12 @@ const PlaceOrder = () => {
           const paymentId = data.paymentId;
 
           const upiresponse = await axios.post(backendUrl+'/api/order/upi',{paymentId},{headers:{token}});
-          console.log(upiresponse.data)
+          if(upiresponse.data.success)
           setPaymentLinks(upiresponse.data.payload)
+         else toast.error(upiresponse.data.message)
 
         } catch (error) {
-          
+          toast.error(error.message);
         }
 
       }
@@ -279,9 +280,7 @@ const PlaceOrder = () => {
 
       <Title text1={'PAYMENT'} text2={'METHOD'}/>
 
-          {/* -------------Payment Method Selection */}
-
-          {/*  */}
+          {/* -------------Payment Method Selection */} 
 
           <div>
       {/* <button onClick={handleUPI}>Create Payment Session</button> */}

@@ -129,9 +129,8 @@ export const placeOrderCashfree = async (req, res) => {
 
   export const placeOrderUpi = async (req, res) => {
 
-    const {paymentId} = req.body;
-    
-    try {
+    const {paymentId} = req.body;    
+    try {      
       const response = await axios.post(
         `https://${process.env.CASHFREE_MODE === 'production' ? 'api' : 'sandbox'}.cashfree.com/pg/orders/sessions`,
         {
@@ -148,11 +147,14 @@ export const placeOrderCashfree = async (req, res) => {
             'content-type': 'application/json',
           },
         }
-      );
-  
+      );      
+      if(response.data.data.payload)
       res.json({ success: true, payload: response.data.data.payload});
     } catch (error) {
       console.error('Error:', error.response ? error.response.data : error.message);
+      if(error.response)
+      res.json({ success: false, message: error.response.data.message});
+    else
       res.json({ success: false, message: error.message});
 
     }

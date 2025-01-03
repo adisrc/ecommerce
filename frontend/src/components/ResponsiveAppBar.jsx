@@ -4,7 +4,6 @@ import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
@@ -13,12 +12,11 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import { Link, useLocation } from 'react-router-dom';
 import { ShopContext } from '../context/ShopContext';
-import { Badge } from '@mui/material';
+import { Badge, Drawer, Menu } from '@mui/material';
 import SearchBar from './SearchBar';
 
-const pages = ['home', 'collection', 'about','contact'];
+const pages = ['home', 'collection', 'about', 'contact'];
 const settings = ['profile', 'orders', 'logout'];
-
 
 function Pages({ handleCloseNavMenu }) {
   const location = useLocation();
@@ -58,32 +56,31 @@ function Pages({ handleCloseNavMenu }) {
 }
 
 function ResponsiveAppBar() {
-
-    const {
-      showSearch,
-      setShowSearch,
-      getCartCount,
-      navigate,
-      token,
-      setToken,
-      setCartItems,
-      userData,
-    } = React.useContext(ShopContext);
+  const {
+    showSearch,
+    getCartCount,
+    navigate,
+    token,
+    setToken,
+    setCartItems,
+    userData,
+  } = React.useContext(ShopContext);
 
   const location = useLocation();
 
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
+  const [openDrawer, setOpenDrawer] = React.useState(false); // Control Drawer visibility
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
-  const handleOpenNavMenu = (event) => {
-    setAnchorElNav(event.currentTarget);
-  };
-  const handleOpenUserMenu = (event) => {
-    setAnchorElUser(event.currentTarget);
+  const handleOpenNavMenu = () => {
+    setOpenDrawer(true); // Open the drawer
   };
 
   const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
+    setOpenDrawer(false); // Close the drawer
+  };
+
+  const handleOpenUserMenu = (event) => {
+    setAnchorElUser(event.currentTarget);
   };
 
   const handleCloseUserMenu = () => {
@@ -112,29 +109,23 @@ function ResponsiveAppBar() {
             >
               <MenuIcon />
             </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{
-                display: { xs: "block", md: "none" },
-                "& .MuiPaper-root": {
-                  backgroundColor: "black", // Menu background color
-                },
-              }}
-            >
-              <Pages handleCloseNavMenu={handleCloseNavMenu} />
-            </Menu>
+
+            {/* Drawer component replaces the Menu */}
+            <Drawer
+  sx={{
+    '& .MuiDrawer-paper': {
+      backgroundColor: 'black',  // Set background color for the drawer content
+      color: 'white',  // Set text color to white inside the drawer for contrast (optional)
+    },
+  }}
+  anchor="left"
+  open={openDrawer} // Controlled by openDrawer state
+  onClose={handleCloseNavMenu} // Close drawer when clicked outside or on close
+>
+  <Box sx={{ width: 250, marginTop:10 }} role="presentation">
+    <Pages handleCloseNavMenu={handleCloseNavMenu} />
+  </Box>
+</Drawer>
           </Box>
 
           <Typography
@@ -158,16 +149,16 @@ function ResponsiveAppBar() {
             Sarky
           </Typography>
 
-         
-          {!showSearch&&
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            <Pages handleCloseNavMenu={handleCloseNavMenu} />
-          </Box>}
+          {!showSearch && (
+            <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
+              <Pages handleCloseNavMenu={handleCloseNavMenu} />
+            </Box>
+          )}
 
           {token ? (
-            <Box sx={{ flexGrow: 0, display:"flex"}}> 
-             <SearchBar/>
-            <IconButton
+            <Box sx={{ flexGrow: 0, display: "flex" }}>
+              <SearchBar />
+              <IconButton
                 size="large"
                 aria-label="show 4 new mails"
                 color="inherit"
@@ -246,8 +237,6 @@ function ResponsiveAppBar() {
                     </MenuItem>
                   );
                 })}
-
-                {/*  */}
               </Menu>
             </Box>
           ) : (
@@ -258,4 +247,5 @@ function ResponsiveAppBar() {
     </AppBar>
   );
 }
+
 export default ResponsiveAppBar;
