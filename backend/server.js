@@ -1,4 +1,4 @@
-// npm i cors dotenv express jsonwebtoken mongoose multer nodemon stripe validator cloudinary bcrypt
+// npm i cors dotenv express jsonwebtoken mongoose multer nodemon validator cloudinary bcrypt
 import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';

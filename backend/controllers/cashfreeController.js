@@ -3,6 +3,7 @@ import userModel from "../models/userModel.js";
 import dotenv from 'dotenv';
 dotenv.config();  // Load .env file
 import { Cashfree } from "cashfree-pg"; 
+import axios from 'axios'
 
 Cashfree.XClientId = process.env.CASHFREE_MODE=='production'?process.env.CASHFREE_CLIENT_ID:process.env.CASHFREE_CLIENT_ID_TEST;
 Cashfree.XClientSecret = process.env.CASHFREE_MODE=='production'?process.env.CASHFREE_SECRET_KEY:process.env.CASHFREE_SECRET_KEY_TEST;
@@ -16,8 +17,7 @@ export const placeOrderCashfree = async (req, res) => {
         success: false,
         message: "Missing required fields: address, items, amount, or userId.",
       });
-    }
-  
+    } 
     try {
       // Create order data
       const orderData = {
@@ -123,6 +123,38 @@ export const placeOrderCashfree = async (req, res) => {
         message: "An error occurred while verifying payment.",
         error: error.message, // Include error details in development if needed
       });
+    }
+  };
+
+
+  export const placeOrderUpi = async (req, res) => {
+
+    const {paymentId} = req.body;
+    
+    try {
+      const response = await axios.post(
+        `https://${process.env.CASHFREE_MODE === 'production' ? 'api' : 'sandbox'}.cashfree.com/pg/orders/sessions`,
+        {
+          payment_method: {
+            upi: {
+              channel: 'link',
+            },
+          },
+          payment_session_id: paymentId,
+        },
+        {
+          headers: {
+            'accept': 'application/json',
+            'content-type': 'application/json',
+          },
+        }
+      );
+  
+      res.json({ success: true, payload: response.data.data.payload});
+    } catch (error) {
+      console.error('Error:', error.response ? error.response.data : error.message);
+      res.json({ success: false, message: error.message});
+
     }
   };
   

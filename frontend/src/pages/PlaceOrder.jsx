@@ -7,13 +7,12 @@ import { toast } from 'react-toastify'
 import axios from 'axios' 
 import {load} from '@cashfreepayments/cashfree-js';
 import CircularProgress from '@mui/material/CircularProgress'
-import { Button, Fab, FormControlLabel,Switch, useMediaQuery } from '@mui/material'
+import {Fab,useMediaQuery } from '@mui/material'
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography'; 
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'; 
 import AddressFormDialog from '../components/AddressFormDialog'
 import { useTheme } from '@emotion/react'
 import Cart from './Cart'
@@ -41,10 +40,11 @@ const PlaceOrder = () => {
   } = useContext(ShopContext);
   
   const [loading, setLoading] = useState(false);
-  const [cod, setCod] = useState(false);
   const [orderItems, setOrderItems] = useState([]);
   const [printroveItems, setPrintroveItems] = useState([]); 
-  const [method,setMethod] = useState('cod');
+  const [method,setMethod] = useState('upi');
+  const [paymentLinks, setPaymentLinks] = useState({});
+
 
         const populateItems = () => {
         const tempOrderItems = [];
@@ -81,7 +81,7 @@ const PlaceOrder = () => {
         country: selectedAddress.country,
         pincode: selectedAddress.pincode,
         weight: 500,
-        cod: cod,
+        cod: (method=='cod')?true:false,
       };
       const response = await axios.post(
         backendUrl + "/api/address/servicability",
@@ -145,7 +145,7 @@ const PlaceOrder = () => {
           const checkoutOptions = {
             paymentSessionId: paymentId,
             redirectTarget: '_modal', // Correct typo
-            returnUrl: returnURL+"/verify?order_id={order_id}&method=cashfree",
+            returnUrl: returnURL+"/home",
           };
       
           // Start Cashfree checkout process
@@ -177,11 +177,37 @@ const PlaceOrder = () => {
           toast.error(error.message)
         }
       };
+
+
+      const handleUPI = async () => {
+
+        try {
+          const { data } = await axios.post(backendUrl+"/api/order/cashfree", orderData, {
+            headers: { token },
+          });                    
+      
+          if (!data || !data.paymentId || !data.orderId) {
+            throw new Error("Invalid payment data received from the server.");
+          }
+
+          const paymentId = data.paymentId;
+
+          const upiresponse = await axios.post(backendUrl+'/api/order/upi',{paymentId},{headers:{token}});
+          console.log(upiresponse.data)
+          setPaymentLinks(upiresponse.data.payload)
+
+        } catch (error) {
+          
+        }
+
+      }
       
       switch (method) {
-         //API Calls for COD
          case 'upi':
-          toast.error("UPI")
+          console.log("Paying via UPI");
+          if(token) handleUPI();
+          else toast.error("Login to Continue");
+          
           break;
          case 'cod':
           console.log("ORDERING VIA COD");
@@ -252,7 +278,37 @@ const PlaceOrder = () => {
       <form onSubmit={onSubmitHandler} className="flex flex-col gap-8">
 
       <Title text1={'PAYMENT'} text2={'METHOD'}/>
+
           {/* -------------Payment Method Selection */}
+
+          {/*  */}
+
+          <div>
+      {/* <button onClick={handleUPI}>Create Payment Session</button> */}
+
+      {Object.keys(paymentLinks).length > 0 && (
+        <div>
+          <h3>Select a Payment Method:</h3>
+          {Object.entries(paymentLinks).map(([key, url]) => (
+            <button
+              key={key}
+              onClick={() => window.open(url, '_blank')}
+              style={{
+                margin: '5px',
+                padding: '10px',
+                backgroundColor: 'blue',
+                color: 'white',
+                borderRadius: '5px',
+                cursor: 'pointer',
+              }}
+            >
+              Pay with {key.charAt(0).toUpperCase() + key.slice(1)}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+          {/*  */}
 
           <div className='flex gap-3 flex-col lg:flex-row'>
             <div onClick={()=>setMethod('upi')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
