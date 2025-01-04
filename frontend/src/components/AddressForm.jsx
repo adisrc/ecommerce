@@ -113,12 +113,12 @@ export const AddressForm = () => {
         onSubmit={handleSubmit}
         noValidate
         sx={{
+          width:'100%',
           maxWidth: 480,
           mx: 'auto',
           display: 'flex',
           flexDirection: 'column',
-          gap: 2,
-          p: 2,
+          rowGap: 2,
         }}
       >
         <TextField

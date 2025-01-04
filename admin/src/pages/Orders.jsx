@@ -73,7 +73,7 @@ const Orders = ({ token }) => {
               </div>
               <p className="mt-3 mb-2 font-medium">{order.address.firstName + " " + order.address.lastName}</p>
               <div>
-                <p>{order.address.street + ","}</p>
+                <p>{order.address.address1 + ","}</p>
                 <p>
                   {order.address.city +
                     ", " +

@@ -252,13 +252,12 @@ const PlaceOrder = () => {
       {/* Left Side */}
 
       <div className="flex flex-col gap-6 w-full sm:max-w-[480px]"> 
-        <Accordion>
+        <Accordion defaultExpanded={addresses.length === 0}>
         <AccordionSummary expandIcon={<ArrowDropDownIcon />} >
           <Typography component="span">Delivering to {selectedAddress.name}</Typography>
         </AccordionSummary>
         <AccordionDetails>
         <AddressFormDialog />
-
         </AccordionDetails>
       </Accordion>
 
@@ -268,7 +267,6 @@ const PlaceOrder = () => {
         </AccordionSummary>
         <AccordionDetails>
         <Cart/>
-
         </AccordionDetails>
       </Accordion>
 
@@ -339,7 +337,7 @@ const PlaceOrder = () => {
         <div className="mt-12"> 
 
           <div className="w-full flex sm:justify-end justify-center mt-8">
-            {<Fab 
+            {(addresses.length > 0 || addressFormSubmitted)&&<Fab 
             onClick={onSubmitHandler} 
             sx={{
               position: isSmallScreen ? 'fixed' : 'static', // Use 'static' when it's not a small screen
@@ -360,14 +358,8 @@ const PlaceOrder = () => {
       variant="extended"
       color="primary"
       disabled={loading || (addresses.length === 0 && !addressFormSubmitted)}
-    >
-      {loading ? (
-        <CircularProgress color="inherit" size={24} />
-      ) : addresses.length === 0 && !addressFormSubmitted ? (
-        "Select Address"
-      ) : (
-        "PLACE ORDER"
-      )}
+    > 
+        PLACE ORDER
     </Fab>}
 
           </div>
