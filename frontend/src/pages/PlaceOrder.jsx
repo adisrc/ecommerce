@@ -6,7 +6,6 @@ import { ShopContext } from '../context/ShopContext'
 import { toast } from 'react-toastify'
 import axios from 'axios' 
 import {load} from '@cashfreepayments/cashfree-js';
-import CircularProgress from '@mui/material/CircularProgress'
 import {Fab,useMediaQuery } from '@mui/material'
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -42,7 +41,7 @@ const PlaceOrder = () => {
   const [loading, setLoading] = useState(false);
   const [orderItems, setOrderItems] = useState([]);
   const [printroveItems, setPrintroveItems] = useState([]); 
-  const [method,setMethod] = useState('upi');
+  const [method,setMethod] = useState('cashfree');
   const [paymentLinks, setPaymentLinks] = useState({});
 
 
@@ -308,12 +307,12 @@ const PlaceOrder = () => {
           {/*  */}
 
           <div className='flex gap-3 flex-col lg:flex-row'>
-            <div onClick={()=>setMethod('upi')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
+            {/* <div onClick={()=>setMethod('upi')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
               <p className={`min-w-3.5 h-3.5 border rounded-full ${method==='upi'?'bg-green-400':''}`}>
               </p>
               <p className='text-gray-500 text-sm font-medium mx-4'>PAY USING UPI</p>
 
-            </div>
+            </div> */}
             <div onClick={()=>setMethod('cashfree')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
               <p className={`min-w-3.5 h-3.5 border rounded-full ${method==='cashfree'?'bg-green-400':''}`}>
 

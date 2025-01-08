@@ -155,7 +155,7 @@ function ResponsiveAppBar() {
             </Box>
           )}
 
-          {token ? (
+      
             <Box sx={{ flexGrow: 0, display: "flex" }}>
               <SearchBar />
               <IconButton
@@ -239,9 +239,9 @@ function ResponsiveAppBar() {
                 })}
               </Menu>
             </Box>
-          ) : (
-            <Link to={"/login"}>Login</Link>
-          )}
+          
+            {!token&&<Link to={"/login"}>Login</Link>}
+          
         </Toolbar>
       </Container>
     </AppBar>

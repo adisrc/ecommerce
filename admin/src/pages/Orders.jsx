@@ -71,7 +71,7 @@ const Orders = ({ token }) => {
                   }
                 })}
               </div>
-              <p className="mt-3 mb-2 font-medium">{order.address.firstName + " " + order.address.lastName}</p>
+              <p className="mt-3 mb-2 font-medium">{order.address.name}</p>
               <div>
                 <p>{order.address.address1 + ","}</p>
                 <p>
@@ -89,7 +89,7 @@ const Orders = ({ token }) => {
             <div>
               <p className="text-sm sm:text-[15px]">Items : {order.items.length}</p>
               <p className="mt-3">Method : {order.paymentMethod}</p>
-              <p>Payment : {order.payment?'Done':'Pending'}</p>
+              <p>Payment : {order.PAID?'Done':'Pending'}</p>
               <p>Date: {new Date(order.date).toLocaleDateString()}</p>
             </div>
             <p className="text-sm sm:text-[15px]">{currency}{order.amount}</p>

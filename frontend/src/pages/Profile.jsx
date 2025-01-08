@@ -101,25 +101,34 @@ function Profile() {
 
 
   const handleImageUpload = async (todo) => {
-    try { 
+    try {
       setPhotoLoading(true);
-      const selectedAddress = new selectedAddress();
-      selectedAddress.append('image', profilePhoto); 
-      const response = await axios.post(backendUrl+"/api/user/upload-photo",selectedAddress,{headers:{token}});
-      if(response.data.success){ 
+      const formData = new FormData(); // Corrected to FormData
+      formData.append('image', profilePhoto); // Append the image to the form data
+  
+      const response = await axios.post(
+        backendUrl + "/api/user/upload-photo",
+        formData,
+        { headers: { token } }
+      );
+  
+      if (response.data.success) {
         setUserData((prevData) => ({
-          ...prevData, 
+          ...prevData,
           photoURL: response.data.photoURL,
         }));
-        toast.success("Profile Photo Updated!")
+        toast.success("Profile Photo Updated!");
+      } else {
+        toast.error(response.data.message || "Failed to update photo.");
       }
-      setPhotoLoading(false)
+  
+      setPhotoLoading(false);
     } catch (error) {
-      setPhotoLoading(false)
+      setPhotoLoading(false);
       console.log(error);
-      toast.error(error.message)
+      toast.error(error.message || "Something went wrong!");
     }
-  }
+  };
   const handleImageDelete = async () => {
     try {
       setPhotoLoading(true);
