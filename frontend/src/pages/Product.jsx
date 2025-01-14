@@ -1,5 +1,5 @@
 import React, {useState, useContext, useEffect} from 'react'
-import { useParams } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext';
 import { assets } from '../assets/assets';
 import RelatedProducts from '../components/RelatedProducts';
@@ -9,7 +9,7 @@ import ResponsiveBottomNavigation from '../components/ResponsiveBottomNav';
 
 const Product = () => {
   const {productId} = useParams();
-  const {products,currency, addToCart,navigate,showGoToCart} = useContext(ShopContext);
+  const {products,currency, addToCart,navigate,showGoToCart,setShowGoToCart} = useContext(ShopContext);
   const [productData,setProductData] = useState(false);
   const [image,setImage]= useState('');
   const [size, setSize] = useState('');
@@ -32,6 +32,12 @@ const Product = () => {
   useEffect(() => {
     fetchProductData();
   }, [productId,products,size])
+
+  const location = useLocation();
+
+  useEffect(() => {
+    setShowGoToCart(false);
+  }, [location.pathname, setShowGoToCart]); // Depend on the path and setter function
   
   return productData ? (
     <div className="border-t-2 pt-10 transition-opacity ease-in duration-500 opacity-100">

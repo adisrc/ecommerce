@@ -74,17 +74,12 @@ const Orders = ({ token }) => {
               <p className="mt-3 mb-2 font-medium">{order.address.name}</p>
               <div>
                 <p>{order.address.address1 + ","}</p>
-                <p>
-                  {order.address.city +
-                    ", " +
-                    order.address.state +
-                    ", " +
-                    order.address.country +
-                    ", " +
-                    order.address.zipcode}
+                <p>Pincode: {
+                    order.address.pincode
+                    }
                 </p>
               </div>
-              <p>{order.address.phone}</p>
+              <p>Phone: {order.address.number}</p>
             </div>
             <div>
               <p className="text-sm sm:text-[15px]">Items : {order.items.length}</p>

@@ -22,22 +22,23 @@ function Pages({ handleCloseNavMenu }) {
   const location = useLocation();
   return (
     <>
-      {pages.map((page) => {
+      {pages.map((page,index) => {
         const isActive = location.pathname === `/${page}`; // Check if current path matches
         return (
+          <Link
+          to={`/${page}`}
+          key={index}
+          style={{
+            textDecoration: "none",
+          }}
+        >
           <MenuItem key={page} onClick={handleCloseNavMenu}>
-            <Link
-              to={`/${page}`}
-              style={{
-                textDecoration: "none",
-              }}
-            >
+
               <Typography
                 sx={{
                   fontWeight: isActive ? 700 : 500, // Bold text for active route
                   textTransform: "uppercase",
                   color: isActive ? "#DFFF00" : "white", // Set color based on active route
-                  padding: isActive ? "0.3rem 0.6rem" : "0", // Padding for active state
                   borderRadius: "5px", // Rounded corners for the active state
                   "&:hover": {
                     color: "#DFFF00",
@@ -47,8 +48,8 @@ function Pages({ handleCloseNavMenu }) {
               >
                 {page}
               </Typography>
-            </Link>
           </MenuItem>
+          </Link>
         );
       })}
     </>
@@ -115,7 +116,6 @@ function ResponsiveAppBar() {
   sx={{
     '& .MuiDrawer-paper': {
       backgroundColor: 'black',  // Set background color for the drawer content
-      color: 'white',  // Set text color to white inside the drawer for contrast (optional)
     },
   }}
   anchor="left"
@@ -123,6 +123,35 @@ function ResponsiveAppBar() {
   onClose={handleCloseNavMenu} // Close drawer when clicked outside or on close
 >
   <Box sx={{ width: 250, marginTop:10 }} role="presentation">
+
+  <Typography
+                  variant="h6"
+                  noWrap 
+                  sx={{
+                    color: "white",
+                    mr: 2,
+                    fontFamily: "monospace",
+                    fontWeight: 700,
+                    letterSpacing: ".3rem",
+                    "&:hover": {
+                      color: "#DFFF00",
+                    },
+                    marginLeft: 2,
+                    marginBottom:4,
+                  }}
+                >
+                  Sarky
+                </Typography>
+                <Box
+                  sx={{
+                    height: "1px", // Thickness of the line
+                    backgroundColor: "#DFFF00", // Color of the line
+                    opacity:0.5,
+                    width: "100%", // Full width of the parent container
+                    marginTop: "8px", // Space between the Typography and the line
+                  }}
+                />
+
     <Pages handleCloseNavMenu={handleCloseNavMenu} />
   </Box>
 </Drawer>
