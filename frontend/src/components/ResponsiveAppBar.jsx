@@ -33,7 +33,6 @@ function Pages({ handleCloseNavMenu }) {
           }}
         >
           <MenuItem key={page} onClick={handleCloseNavMenu}>
-
               <Typography
                 sx={{
                   fontWeight: isActive ? 700 : 500, // Bold text for active route
@@ -49,6 +48,15 @@ function Pages({ handleCloseNavMenu }) {
                 {page}
               </Typography>
           </MenuItem>
+          <Box
+                  sx={{
+                    height:"1px",
+                    backgroundColor: "#DFFF00", // Color of the line
+                    opacity:isActive?"1":"0.5",
+                    width: "100%", // Full width of the parent container
+                    marginTop: "8px", // Space between the Typography and the line
+                  }}
+                />
           </Link>
         );
       })}
@@ -99,7 +107,7 @@ function ResponsiveAppBar() {
     <AppBar position="static" sx={{ marginTop: 0, backgroundColor: "black" }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+          <Box >
             <IconButton
               size="large"
               aria-label="account of current user"
@@ -162,7 +170,6 @@ function ResponsiveAppBar() {
             noWrap
             component={Link}
             to="/"
-            href="#app-bar-with-responsive-menu"
             sx={{
               mr: 2,
               flexGrow: 1,
