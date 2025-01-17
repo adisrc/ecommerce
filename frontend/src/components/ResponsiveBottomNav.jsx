@@ -11,7 +11,6 @@ const ResponsiveBottomNavigation = ({children}) => {
 
   return (
     <BottomNavigation
-      showLabels
       sx={{
         position: "fixed",
         bottom: 0,
